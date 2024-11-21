@@ -2,6 +2,7 @@
 base_url = "https://parthsarkar17.github.io/"
 
 theme = "tilde"
+generate_feeds = true
 
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = true
