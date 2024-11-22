@@ -1,3 +1,6 @@
 [submodule "themes/tilde"]
     path = themes/tilde
     url = https://git.sr.ht/~savoy/tilde
+[submodule "themes/themes/anemone"]
+	path = themes/themes/anemone
+	url = git@github.com:Speyll/anemone.git
