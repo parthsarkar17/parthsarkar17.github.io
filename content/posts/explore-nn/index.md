@@ -1,6 +1,6 @@
 +++
 title = "A Mathematical Dive Into a Toy Neural Net"
-date = 2023-08-26
+date = 2024-12-05
 draft = false
 
 [taxonomies]
@@ -13,7 +13,7 @@ toc = true
 comment = true
 copy = true
 math = "katex"
-mermaid = false
+mermaid = true
 outdate_alert = false
 outdate_alert_days = 120
 display_tags = true
@@ -21,7 +21,7 @@ truncate_summary = false
 featured = false
 reaction = false
 +++
-_This post was adapted from a document I wrote for new members of my engineering project team,
+_This post was adapted from a document I wrote in August 2023 for new members of my engineering project team,
 [CUAir](https://cuair.org/). My subteam, in particular, writes ML models for computer vision tasks. I thought this
 would be a cool intro to our work._
 
@@ -114,7 +114,7 @@ $$ \begin{equation*}\vec{y} = f\left(\begin{bmatrix} x_1 \newline x_2 \newline x
     5x_1 + 6x_2 + 7x_3 + 8x_4 \newline
     9x_1 + 10x_2 + 11x_3 + 12x_4 \end{bmatrix}\end{equation*} $$
 
-Notice that $f: \mathbb{R}^4 \to \mathbb{R}^3$ takes in a four-dimensional vector, and outputs a three-dimensional vector. Notice also that this means that $f$ \textbf{cannot} be an injective function; the matrix compresses four dimensions into three dimensions, so it is impossible to preserve the distinctness of all input vectors. 
+Notice that $f: \mathbb{R}^4 \to \mathbb{R}^3$ takes in a four-dimensional vector, and outputs a three-dimensional vector. Notice also that this means that $f$ **cannot** be an injective function; the matrix compresses four dimensions into three dimensions, so it is impossible to preserve the distinctness of all input vectors. 
 
 Follow-up: does any linear function from higher to lower dimensions need to be surjective? Take a moment to ponder...
 
@@ -212,239 +212,205 @@ First, let's set up the toy problem that I mentioned in the introduction. The tw
 
 For those of you familiar with logic gates, we will be attempting to build a neural network that can classify the Exclusive-OR (XOR) function.
 
-\begin{table}[hbt!]
-    \centering
-    \begin{tabular}{c|c|c}
-       $i_1$ & $i_2$ & $y$ \\
-       \hline
-       0  &  0 & 0  \\
-       0  &  1 & 1  \\
-       1  &  0 & 1  \\
-       1  &  1 & 0  \\
-    \end{tabular}
-    \caption{XOR Function}
-    \label{tab:my_label}
-\end{table}
+| $i_1$ | $i_2$ | $y$   |
+| ----- | ----- | ----- |
+| 0     | 0     | 0     |
+| 0     | 1     | 1     |
+| 1     | 0     | 1     |
+| 1     | 1     | 0     |
+
 Indeed, this function does look really simple. But here's what I meant by ``not-linearly-separable":
 
-\begin{figure}[htp]
-    \centering
-    \includegraphics[width=4cm]{xor_no_pertub.png}
-    \caption{XOR Visualized}
-\end{figure}
-Try finding a single line that can separate the orange-classified points from the blue-classified points. It's impossible! In other words, you're going to need some sort of non-linear (curved) decision boundary in order to specify the sectors of this space to which you'd like orange and blue points to belong. Getting computers to create this curved boundary for us is what challenged researchers for years. For us, neural networks will do exactly this. \\
 
-\textbf{Keep in mind:} computers can very easily create linear decision boundaries. That is, given some linearly-separable data, they can find a hyper-plane through space such that the points lying on one side of the plane are classified as ``0" and points on the other side are classified as ``1". There are many algorithms for this, such as Support Vector Machines, the Perceptron, and Logistic Regression. Fancy names, but their fundamental idea is that they create this dividing plane through space.
+![alt-text](xor_no_pertub.png)
 
-\subsubsection{The Dataset}
-If we expect the neural network to classify the contents of Table 1 for us, it's going to need some examples to work with. That's reasonable; after all, we're asking it to decide which parts of space require a ``0" classification and which other parts need a ``1" classification.\\
+Try finding a single line that can separate the orange-classified points from the blue-classified points. It's impossible! In other words, you're going to need some sort of non-linear (curved) decision boundary in order to specify the sectors of this space to which you'd like orange and blue points to belong. Getting computers to create this curved boundary for us is what challenged researchers for years. For us, neural networks will do exactly this.
 
-You might well be asking: ``Since we only have access to those four points, how many more examples do we even have to give up?" Well, because we only care about how the net classifies those four points, we can create a dataset that includes points in the general vicinity around the four XOR points. If we create a general ``circle" of new points around each original XOR point, each with the same label as its corresponding XOR point, then the importance of ``proximity" will be driven home for the net. It should then have no trouble classifying the ``center" of each of those four circles of points (which are our four original XOR inputs). \\
+**Keep in mind:** computers can very easily create linear decision boundaries. That is, given some linearly-separable data, they can find a hyper-plane through space such that the points lying on one side of the plane are classified as "0" and points on the other side are classified as "1". There are many algorithms for this, such as Support Vector Machines, the Perceptron, and Logistic Regression. Fancy names, but their fundamental idea is that they create this dividing plane through space.
 
-Luckily, the idea of sampling points in a general circle around one particular point is standard practice: it's called adding ``Gaussian noise" to the point at the center of the circle. Let each data point $\vec{x}_i \in \mathcal{D}$ be an input to the XOR function that has been dislocated by some 2-D Gaussian noise. The neural network should build a non-linear decision boundary to accurately classify the XOR points after training on the contents of these four clusters:
+### The Dataset
+If we expect the neural network to classify the contents of Table 1 for us, it's going to need some examples to work with. That's reasonable; after all, we're asking it to decide which parts of space require a "0" classification and which other parts need a "1" classification.
 
-\begin{figure}[htp]
-    \centering
-    \includegraphics[width=4.1cm]{dataset}
-    % \caption{Our Dataset}
-\end{figure}
+You might well be asking: _"Since we only have access to those four points, how many more examples do we even have to give up?"_ Well, because we only care about how the net classifies those four points, we can create a dataset that includes points in the general vicinity around the four XOR points. If we create a general "circle" of new points around each original XOR point, each with the same label as its corresponding XOR point, then the importance of "proximity" will be driven home for the net. It should then have no trouble classifying the "center" of each of those four circles of points (which are our four original XOR inputs).
 
-\newpage
+Luckily, the idea of sampling points in a general circle around one particular point is standard practice: it's called adding "Gaussian noise" to the point at the center of the circle. Let each data point $\vec{x}_i \in \mathcal{D}$ be an input to the XOR function that has been dislocated by some 2-D Gaussian noise. The neural network should build a non-linear decision boundary to accurately classify the XOR points after training on the contents of these four clusters:
 
-\subsection{Neural Network Architecture}
-So far, we've learned a great deal about functions. In the context of the XOR dataset we just created, we learned about how the data is not linearly separable, which makes it difficult for a computer to define a function to delineate boundaries between the two classifications. \\
 
-But we also learned that, if it exists, computers are good at finding a linear separation within a dataset. Neural networks take advantage of this; they attempt to transform the linearly-inseparable data into a higher-dimensional space where the new data \textbf{is} linearly separable. We can then separate it using any one of the linear classification techniques available. \\
+![alt-text](dataset.png)
+
+
+### Neural Network Architecture
+So far, we've learned a great deal about functions. In the context of the XOR dataset we just created, we learned about how the data is not linearly separable, which makes it difficult for a computer to define a function to delineate boundaries between the two classifications.
+
+But we also learned that, if it exists, computers are good at finding a linear separation within a dataset. Neural networks take advantage of this; they attempt to transform the linearly-inseparable data into a higher-dimensional space where the new data _is_ linearly separable. We can then separate it using any one of the linear classification techniques available.
 
 This section will hopefully illuminate how each component of the neural network supports this general goal. Here's a diagram of the overall architecture. Refer back to this throughout the section:
 
-\begin{figure}[htp]
-    \centering
-    \includegraphics[width=9cm]{nn_diagram.png}
-    \caption{The Structure Of Our Neural Net}
-\end{figure}
 
-Let $W^{(1)} \in \mathbb{R}^{3 \times 3}$ and $W^{(2)}\in \mathbb{R}^{1 \times 4}$ respectively define the first and second weight matrices. Let $x^{(1)}$ and $x^{(2)}$ respectively define the inputs to these weight matrices (for now, ignore the added `1's to the bottom of each input). Lastly, let $z^{(i)}$ be the output of the $i$th linear transformation.
+![alt-text](nn_diagram.png)
 
-\subsubsection{The ``Hidden" Layer}
-For now, we'll use the term ``hidden layer" to denote $z^{(1)}$. You'll notice that, in the architecture laid out above, $W^{(1)}$ is shaped in such a way that the input $x^{(1)}$ turns into a vector $z^{(1)}$ that lives in a higher dimension than $x^{(1)}$ itself.  \\
+Let $W^{(1)} \in \mathbb{R}^{3 \times 3}$ and $W^{(2)}\in \mathbb{R}^{1 \times 4}$ respectively define the first and second weight matrices. Let $x^{(1)}$ and $x^{(2)}$ respectively define the inputs to these weight matrices (for now, ignore the added 1's to the bottom of each input). Lastly, let $z^{(i)}$ be the output of the $i$th linear transformation.
 
-This plays into the neural network's objective of sending the input points to a higher-dimensional space in order to linearly-classify them more easily. So, does that mean we've reached our goal? Is this the transformation we can use to draw a separating plane between the two sets of points? \\
+#### The "Hidden" Layer
+For now, we'll use the term "hidden layer" to denote $z^{(1)}$. You'll notice that, in the architecture laid out above, $W^{(1)}$ is shaped in such a way that the input $x^{(1)}$ turns into a vector $z^{(1)}$ that lives in a higher dimension than $x^{(1)}$ itself. 
 
-Well, not exactly. Although we are indeed in a higher-dimensional space, recall that the transformation from $x^{(1)}$ to $z^{(1)}$ was linear. This means that no information can be ``created" in this transformation to properly distinguish output points by their classifications. Unfortunately, the higher-dimensional outputs still lie on a sub-space of the same dimension as the lower-dimensional inputs, so these outputs points are just as non-linearly separable as the input points that created them. \\
+This plays into the neural network's objective of sending the input points to a higher-dimensional space in order to linearly-classify them more easily. So, does that mean we've reached our goal? Is this the transformation we can use to draw a separating plane between the two sets of points?
 
-You would then be correct to wonder, ``if we're on a sub-space of the same dimension as before, why do we want this linear transformation in the first place?". The answer is: if we want to introduce some non-linearity to the data to make it linearly-separable, higher-dimensional data gives more ``ways" (or, more accurately, ``dimensions") through which clusters of data points can be differentiated from one another. This is precisely what activation functions do; they create the kinds of distinctness between clusters based on their classifications that linear transformations alone cannot provide. The linear transformation to a higher-dimensional space just makes it so that these activation functions can do their jobs more easily. More on activation functions in the next section.
+Well, not exactly. Although we are indeed in a higher-dimensional space, recall that the transformation from $x^{(1)}$ to $z^{(1)}$ was linear. This means that no information can be "created" in this transformation to properly distinguish output points by their classifications. Unfortunately, the higher-dimensional outputs still lie on a sub-space of the same dimension as the lower-dimensional inputs, so these outputs points are just as non-linearly separable as the input points that created them.
 
-\begin{figure}[htp]
-    \centering
-    \includegraphics[width=9cm]{3d_data.png}
-    \caption{What We Hope Our Data Transforms Into}
-\end{figure}
+You would then be correct to wonder, _"if we're on a sub-space of the same dimension as before, why do we want this linear transformation in the first place?"_. The answer is: if we want to introduce some non-linearity to the data to make it linearly-separable, higher-dimensional data gives more "ways" (or, more accurately, "dimensions") through which clusters of data points can be differentiated from one another. This is precisely what activation functions do; they create the kinds of distinctness between clusters based on their classifications that linear transformations alone cannot provide. The linear transformation to a higher-dimensional space just makes it so that these activation functions can do their jobs more easily. More on activation functions in the next section.
 
-\subsubsection{The Activation Function}
+
+![alt-text](3d_data.png)
+
+#### The Activation Function
 
 The activation function plays the crucial role of introducing some non-linearity into the neural network, as described above. For now, let's concentrate on the ReLU function, applied element-wise to $z^{(1)}$ in order to produce $x^{(1)}$ in Figure 4. Here's what it looks like:
 
-\[\mbox{ReLU}(x) = 
+$$ {ReLU}(x) = 
     \begin{cases}
-        x & \text{if } x > 0\\
+        x & \text{if } x > 0 \newline
         0 & \text{if } x \leq 0 
     \end{cases}
-\]
+ $$
 
-\begin{figure}[htp]
-    \centering
-    \includegraphics[width=7cm]{relu.png}
-    \caption{Activation Function on the Hidden Layer}
-\end{figure}
+ ![alt-text](relu.png)
 
-It's a relatively simple piece-wise function, which might be a little surprising. Can something so simple really do the trick? After all, forgetting about the angle at $x = 0$, the function looks suspiciously linear. Indeed, it turns out that that angle is precisely what we need to create a distinctness between clusters. \\
+It's a relatively simple piece-wise function, which might be a little surprising. Can something so simple really do the trick? After all, forgetting about the angle at $x = 0$, the function looks suspiciously linear. Indeed, it turns out that that angle is precisely what we need to create a distinctness between clusters.
 
-Remember: the key goal of the neural network is to blow the data up into a higher-dimensional space, then distinguish the various clusters properly, then separate these transformed clusters with a linear hyperplane. When it comes to that second step, ``distinguishing clusters", you might have already started to see the potential of ReLU. \\
+Remember: the key goal of the neural network is to blow the data up into a higher-dimensional space, then distinguish the various clusters properly, then separate these transformed clusters with a linear hyperplane. When it comes to that second step, "distinguishing clusters", you might have already started to see the potential of ReLU.
 
-Refer back to Figure 5. What if we found a way to keep the two clusters with the ``0" classification ``on the ground", and then somehow ``raise up" the two clusters with the ``1" classification (in order to linearly-separate them well)? Again, this wouldn't be possible with a simple linear transformation. But, if we introduce ReLU to the datapoints, it's a different story.\\
+Refer back to Figure 5. What if we found a way to keep the two clusters with the "0" classification "on the ground", and then somehow "raise up" the two clusters with the "1" classification (in order to linearly-separate them well)? Again, this wouldn't be possible with a simple linear transformation. But, if we introduce ReLU to the datapoints, it's a different story.
 
-Here's how we can leverage the angle within ReLU: if the linear transformation, in addition to increasing the dimensionality of the clusters, makes some of the new dimensions negative, then ReLU could act on these negative entries, making them 0, and thereby forcing the transformed data point to a completely new part of 3-D space. \\
+Here's how we can leverage the angle within ReLU: if the linear transformation, in addition to increasing the dimensionality of the clusters, makes some of the new dimensions negative, then ReLU could act on these negative entries, making them 0, and thereby forcing the transformed data point to a completely new part of 3-D space.
 
-In other words, \textit{we can choose our linear transformation wisely} in order to force clusters with classification ``0" to have specific dimensions with negative entries, while forcing clusters of classification ``1" to have other dimensions contain negative entries. Then, ReLU would act differently depending on which entries are negative, potentially sending these clusters to distinguishable (and linearly-separable) parts of space. \\
+In other words, _we can choose our linear transformation wisely_ in order to force clusters with classification "0" to have specific dimensions with negative entries, while forcing clusters of classification "1" to have other dimensions contain negative entries. Then, ReLU would act differently depending on which entries are negative, potentially sending these clusters to distinguishable (and linearly-separable) parts of space.
 
-That's the key idea behind a neural network. Creating this distinguishable data out of an initially-indistinguishable dataset is difficult, but the linear transformation and the activation act in tandem to perform this brilliant feat. For future reference, the space created by this transformation and activation function combo is called a ``feature space"; it sounds fancy, but the idea behind the way it's created is simple and elegant. \\
+That's the key idea behind a neural network. Creating this distinguishable data out of an initially-indistinguishable dataset is difficult, but the linear transformation and the activation act in tandem to perform this brilliant feat. For future reference, the space created by this transformation and activation function combo is called a "feature space"; it sounds fancy, but the idea behind the way it's created is simple and elegant.
 
 I think that's pretty cool. Don't you?
 
-\subsubsection{The Final Linear Classifier}
+#### The Final Linear Classifier
 
-So, we've chosen our particular linear transformation $W^{(1)}$ to create negativity in certain dimensions and maintain non-negativity in others, depending on cluster classification. Then we've applied ReLU to get the linear-separability that we need. What now? \\
+So, we've chosen our particular linear transformation $W^{(1)}$ to create negativity in certain dimensions and maintain non-negativity in others, depending on cluster classification. Then we've applied ReLU to get the linear-separability that we need. What now? 
 
 Now, we actually create this linear decision boundary between clusters. An $n$-dimensional hyper-plane is defined with the constants $d$ and $c_1, c_2, ..., c_n$ as follows:
-\[c_1 x_1 + c_2 x_2 + ... + c_n x_n + d = 0\]
-This definition says something very important: a random point $\vec{x}$ lies on the hyperplane if and only if
-\[\begin{bmatrix}c_1 & c_2 & ... & c_n\end{bmatrix} \begin{bmatrix}x_1 \\ x_2 \\ \vdots \\ x_n\end{bmatrix} + d = C\vec{x} + d = 0\]
-So, if $\vec{x}$ does not lie on the plane defined by $C$ and $d$, then the value of $C\vec{x} + d$ will \textit{not} be 0; it will either be a positive or negative value. In particular, points to one side of the plane will be classified as positive, and points to the other side will be classified as negative. We can leverage this fact to build our linear separator!\\
+$$c_1 x_1 + c_2 x_2 + ... + c_n x_n + d = 0$$
 
-For the moment, ignore the parameter \textit{d}. Once again, if we wisely choose the linear transformation from our feature space to the single-dimensional output, we should classify points classified as ``0" as negative and points classified ``1" as positive. In other words, we're carefully building the row matrix $C$ (and calling it $W^{(2)}$) in order to define a decision boundary for our now linearly-separable clusters. \\
+This definition says something very important: a random point $\vec{x}$ lies on the hyperplane if and only if
+$$\begin{bmatrix}c_1 & c_2 & ... & c_n\end{bmatrix} \begin{bmatrix}x_1 \newline x_2 \newline \vdots \newline x_n\end{bmatrix} + d = C\vec{x} + d = 0$$
+
+So, if $\vec{x}$ does not lie on the plane defined by $C$ and $d$, then the value of $C\vec{x} + d$ will _not_ be 0; it will either be a positive or negative value. In particular, points to one side of the plane will be classified as positive, and points to the other side will be classified as negative. We can leverage this fact to build our linear separator!
+
+For the moment, ignore the parameter _d_. Once again, if we wisely choose the linear transformation from our feature space to the single-dimensional output, we should classify points classified as "0" as negative and points classified "1" as positive. In other words, we're carefully building the row matrix $C$ (and calling it $W^{(2)}$) in order to define a decision boundary for our now linearly-separable clusters.
 
 There's one more piece we've glossed over till now: the role of the Sigmoid activation function and why it acts on the final, scalar output of the network. Here's what the function looks like:
 
-$$\sigma(x) = \frac{1}{1 + e^{-x}}$$
-\begin{figure}[htp]
-    \centering
-    \includegraphics[width=9cm]{sigmoid.png}
-    \caption{Activation Function on the Final Linear Classifier}
-\end{figure}
 
-As you can see, the Sigmoid function  asymptotically approaches 0 as $x \to -\infty$, and it approaches 1 as $x \to \infty$. Also notice that $\sigma(0) = \frac{1}{2}$; so, negative inputs have output values of smaller than $\frac{1}{2}$ (close to 0) and positive inputs have output values of greater than $\frac{1}{2}$ (close to 1). \\
+![alt-text](sigmoid.png)
 
-Remember that this activation function is acting on the output of our linear classifier, which gives negative values for ``0" classifications and positive values for ``1" classifications. Sometimes, however, we care about just \textit{how} correct a classification is. A ``more negative" output for a ``0" classification is better than a negative output that is closer to 0. Applying the Sigmoid function makes this concept of ``more" or ``less" negativity well-defined. If we apply $\sigma$ to any negative value, an output closer to 0 would signify more decisiveness of the model (more negativity), whereas an output closer to 0.5 would signify less decisiveness (less negativity). We can say the equivalent for positive classifications and $\sigma$'s corresponding proximity to 1. \\
-\[f\left(\vec{x}\right) = \frac{1}{1 + e^{-W^{(2)}\vec{x}}}\]
+As you can see, the Sigmoid function  asymptotically approaches 0 as $x \to -\infty$, and it approaches 1 as $x \to \infty$. Also notice that $\sigma(0) = \frac{1}{2}$; so, negative inputs have output values of smaller than $\frac{1}{2}$ (close to 0) and positive inputs have output values of greater than $\frac{1}{2}$ (close to 1). 
 
-This final layer, displayed compactly above, is also called Logistic Regression. In a sense, it provides a kind of ``probability" for the correctness of the output. If the model was very sure that a data-point had the classification ``1", it would output a value $p \approx 1$ at the end of the network, and this value would also serve as this ``probability of correctness". On the other hand, if the model was very sure a data-point was labeled ``0", it would output a positive value $p \approx 0$, and the probability of correctness would be $1- p$. It's a handy set up that gives us real-time insight into what the algorithm is thinking on any given data-point.
+Remember that this activation function is acting on the output of our linear classifier, which gives negative values for "0" classifications and positive values for "1" classifications. Sometimes, however, we care about just \textit{how} correct a classification is. A "more negative" output for a "0" classification is better than a negative output that is closer to 0. Applying the Sigmoid function makes this concept of "more" or "less" negativity well-defined. If we apply $\sigma$ to any negative value, an output closer to 0 would signify more decisiveness of the model (more negativity), whereas an output closer to 0.5 would signify less decisiveness (less negativity). We can say the equivalent for positive classifications and $\sigma$'s corresponding proximity to 1. 
+$$f\left(\vec{x}\right) = \frac{1}{1 + e^{-W^{(2)}\vec{x}}}$$
 
-\subsubsection{What Are Those Extra ``1"s On Every Layer?}
+This final layer, displayed compactly above, is also called Logistic Regression. In a sense, it provides a kind of "probability" for the correctness of the output. If the model was very sure that a data-point had the classification "1", it would output a value $p \approx 1$ at the end of the network, and this value would also serve as this "probability of correctness". On the other hand, if the model was very sure a data-point was labeled "0", it would output a positive value $p \approx 0$, and the probability of correctness would be $1- p$. It's a handy set up that gives us real-time insight into what the algorithm is thinking on any given data-point.
 
-This is the section where I admit that I lied about using linear transformations. Well, they \textit{were} linear transformations, but they were linear transformations on vectors with an additional ``1" cryptically placed on the bottom of each vector. Those ``1"s actually mean the transformations were \textit{affine}. \\
+#### What Are Those Extra ``1"s On Every Layer?
 
-These kinds of mappings are linear transformations, but with the added so-called ``y-intercept" on the output. So, instead of our normal $\vec{y} = A\vec{x}$, we'd get something like $\vec{y} = A\vec{x} + \vec{b}$. Here's a quick proof that adding the ``1" on the bottom of $\vec{x}$ does the same thing as adding this y-intercept component, if you accordingly change $A$: \\
+This is the part where I admit that I lied about using linear transformations. Well, they _were_ linear transformations, but they were linear transformations on vectors with an additional "1" cryptically placed on the bottom of each vector. Those "1"s actually mean the transformations were _affine_.
 
+These kinds of mappings are linear transformations, but with the added so-called "y-intercept" on the output. So, instead of our normal $\vec{y} = A\vec{x}$, we'd get something like $\vec{y} = A\vec{x} + \vec{b}$. Here's a quick proof that adding the "1" on the bottom of $\vec{x}$ does the same thing as adding this y-intercept component, if you accordingly change $A$:
+
+$$
 \begin{align*}
 A\vec{x} + \vec{b} 
 &= 
 \begin{bmatrix}
-a_{11} & a_{12} & \hdots & a_{1n} \\
-a_{21} & a_{22} & \hdots & a_{2n} \\
-\vdots & \vdots & \ddots & \vdots \\
-a_{m1} & a_{m2} & \hdots & a_{mn}
+a_{11} & a_{12} & ... & a_{1n} \newline
+a_{21} & a_{22} & ... & a_{2n} \newline
+\vdots & \vdots & \ddots & \vdots \newline
+a_{m1} & a_{m2} & ... & a_{mn}
 \end{bmatrix}
 \begin{bmatrix}
-x_1 \\ x_2 \\ \vdots \\ x_n
+x_1 \newline x_2 \newline \vdots \newline x_n
 \end{bmatrix} +
 \begin{bmatrix}
-b_1 \\ b_2 \\ \vdots \\ b_m
-\end{bmatrix} \\
+b_1 \newline b_2 \newline \vdots \newline b_m
+\end{bmatrix} \newline
 & = 
 \begin{bmatrix}
-a_{11}\cdot x_1 + a_{12}\cdot x_2 + \hdots + a_{1n}\cdot x_n \\
-a_{21}\cdot x_1 + a_{22}\cdot x_2 + \hdots + a_{2n}\cdot x_n \\
-\vdots \\
-a_{m1}\cdot x_1 + a_{m2}\cdot x_2 + \hdots + a_{mn}\cdot x_n
+a_{11}\cdot x_1 + a_{12}\cdot x_2 + ... + a_{1n}\cdot x_n \newline
+a_{21}\cdot x_1 + a_{22}\cdot x_2 + ... + a_{2n}\cdot x_n \newline
+\vdots \newline
+a_{m1}\cdot x_1 + a_{m2}\cdot x_2 + ... + a_{mn}\cdot x_n
 \end{bmatrix} +
 \begin{bmatrix}
-b_1 \\ b_2 \\ \vdots \\ b_m
-\end{bmatrix} \\
+b_1 \newline b_2 \newline \vdots \newline b_m
+\end{bmatrix} \newline
 &=
 \begin{bmatrix}
-a_{11}\cdot x_1 + a_{12}\cdot x_2 + \hdots + a_{1n}\cdot x_n + b_1 \cdot 1\\
-a_{21}\cdot x_1 + a_{22}\cdot x_2 + \hdots + a_{2n}\cdot x_n + b_2 \cdot 1\\
-\vdots \\
-a_{m1}\cdot x_1 + a_{m2}\cdot x_2 + \hdots + a_{mn}\cdot x_n + b_m \cdot 1
-\end{bmatrix} \\
+a_{11}\cdot x_1 + a_{12}\cdot x_2 + ... + a_{1n}\cdot x_n + b_1 \cdot 1\newline
+a_{21}\cdot x_1 + a_{22}\cdot x_2 + ... + a_{2n}\cdot x_n + b_2 \cdot 1\newline
+\vdots \newline
+a_{m1}\cdot x_1 + a_{m2}\cdot x_2 + ... + a_{mn}\cdot x_n + b_m \cdot 1
+\end{bmatrix} \newline
 &=
 \begin{bmatrix}
-a_{11} & a_{12} & \hdots & a_{1n} & b_1 \\
-a_{21} & a_{22} & \hdots & a_{2n} & b_2\\
-\vdots & \vdots & \ddots & \vdots & \vdots \\
-a_{m1} & a_{m2} & \hdots & a_{mn} & b_m
+a_{11} & a_{12} & ... & a_{1n} & b_1 \newline
+a_{21} & a_{22} & ... & a_{2n} & b_2\newline
+\vdots & \vdots & \ddots & \vdots & \vdots \newline
+a_{m1} & a_{m2} & ... & a_{mn} & b_m
 \end{bmatrix}
 \begin{bmatrix}
-x_1 \\ x_2 \\ \vdots \\ x_n \\ 1
+x_1 \newline x_2 \newline \vdots \newline x_n \newline 1
 \end{bmatrix}
 = A'\vec{x}'
 \end{align*}
-Where $A'$ is the same as $A$ with an additional column $\vec{b}$, and $\vec{x}'$ is $x$ with an additional $1$ on its lowest entry. The ability to express $A\vec{x}+\vec{b}$ as a linear transformation of a higher-dimensional vector $\vec{x}'$ is why I've freely been using the term ``linear transformation" in previous sections. The column $\vec{b}$ is part of what's ``chosen wisely" in each linear transformation. \\
+$$
+Where $A'$ is the same as $A$ with an additional column $\vec{b}$, and $\vec{x}'$ is $x$ with an additional $1$ on its lowest entry. The ability to express $A\vec{x}+\vec{b}$ as a linear transformation of a higher-dimensional vector $\vec{x}'$ is why I've freely been using the term "linear transformation" in previous sections. The column $\vec{b}$ is part of what's "chosen wisely" in each linear transformation. 
 
-But why do we even need affine transformations instead of simple linear ones? When projecting data to a higher-dimensional space for future linear separation, it's always helpful to have an extra degree of freedom to help send data to a more useful part of space. In addition, when building the plane that actually separates the data, odds are, the best separating plane doesn't go through the origin. Hence, a linear transformation is not ideal, and we have to add in the extra ``\textit{d}" term that we ignored earlier. \\
+But why do we even need affine transformations instead of simple linear ones? When projecting data to a higher-dimensional space for future linear separation, it's always helpful to have an extra degree of freedom to help map input data to a more useful part of space. In addition, when building the plane that actually separates the data, odds are, the best separating plane doesn't go through the origin. Hence, a linear transformation is not ideal, and we have to add in the extra "_d_" term that we ignored earlier.
 
-\subsubsection{Conclusions on the Architecture}
-Those four components, the hidden layer, the activation function, the linear classifier, and the intercept, just about sum up the key structure of our neural net. They each have a piece to play in the abstract goal of the network: to raise the dimensionality of the data, to construct linear separability in the data, and to finally separate the data with respect to their classifications. \\
+#### Conclusions on the Architecture
+Those four components, the hidden layer, the activation function, the linear classifier, and the intercept, just about sum up the key structure of our neural net. They each have a piece to play in the abstract goal of the network: to raise the dimensionality of the data, to construct linear separability in the data, and to finally separate the data with respect to their classifications.
 
-The crux of this model so far was our choice of linear transformations. A well-chosen $W^{(1)}$ and $W^{(2)}$ would define the set of rules we need to classify the XOR problem correctly; on the other hand, any poorly-chosen transformations would yield very frightening and incorrect results. So, then, how do we choose our transformations wisely? Well, the goal isn't for us to choose them at all; we'll leave that up to the computer to decide for itself, through a process called ``training".
+The crux of this model so far was our choice of linear transformations. A well-chosen $W^{(1)}$ and $W^{(2)}$ would define the set of rules we need to classify the XOR problem correctly; on the other hand, any poorly-chosen transformations would yield very frightening and incorrect results. So, then, how do we choose our transformations wisely? Well, the goal isn't for us to choose them at all; we'll leave that up to the computer to decide for itself, through a process called "training".
 
-\subsection{Training the Neural Network}
-So far, we've laid out the ideas behind why the neural network \textit{f} has its particular structure. Now, we'll dive into how this structure is leveraged to create an approximation of the function that we want to emulate. During this process, called ``training", the neural network looks at a data point $\vec{x}$, outputs an approximation for its label $f(\vec{x})$, determines how good its approximation was by some metric, and updates its weights in a way that will provide a better approximation for subsequent data points. \\
+### Training the Neural Network
+So far, we've laid out the ideas behind why the neural network _f_ has its particular structure. Now, we'll dive into how this structure is leveraged to create an approximation of the function that we want to emulate. During this process, called "training", the neural network looks at a data point $\vec{x}$, outputs an approximation for its label $f(\vec{x})$, determines how good its approximation was by some metric, and updates its weights in a way that will provide a better approximation for subsequent data points.
 
-The process of getting an approximation for a data point is called ``forward propagation". As the name suggests, the neural network takes in a data point $\vec{x}$, feeds it through its weight layers and activation functions, and finally outputs an approximation $f(\vec{x})$. Then, we get a ``cost" for the approximation, which considers how close $f(\vec{x})$ is to our true label $y$. Finally, the network goes through a process called ``backwards propagation", in which the network modifies its own weights to get better approximations in the future. \\
+The process of getting an approximation for a data point is called "forward propagation". As the name suggests, the neural network takes in a data point $\vec{x}$, feeds it through its weight layers and activation functions, and finally outputs an approximation $f(\vec{x})$. Then, we get a "cost" for the approximation, which considers how close $f(\vec{x})$ is to our true label $y$. Finally, the network goes through a process called "backwards propagation", in which the network modifies its own weights to get better approximations in the future.
 
-In non-toy neural networks, these processes is almost never done on just a single data point; it's usually more efficient to compute approximations of many data points, get an average of how good they are, and update the weights (with respect to this average score) only once. Luckily, we're using a baby network; for our purposes, we'll consider only one data point at a time when computing our approximations and how to make them better. \\
+In non-toy neural networks, these processes is almost never done on just a single data point; it's usually more efficient to compute approximations of many data points, get an average of how good they are, and update the weights (with respect to this average score) only once (a process called _batching_). Luckily, we're using a baby network; for our purposes, we'll consider only one data point at a time when computing our approximations and how to make them better.
 
-\subsection{Forward Propagation}
+### Forward Propagation
 In the process of training, we don't care so much about what our approximations actually are. We only care about them in the context of what their corresponding cost function values are. Here's what our cost function looks like for one data point: 
-\[\mathcal{L}(f, \vec{x}, y) = \left(y - f(\vec{x})\right)^{2}\]
+$$\mathcal{L}(f, \vec{x}, y) = \left(y - f(\vec{x})\right)^{2}$$
 
-As you can see, this (non-negative) function outputs a very small value when the approximation $f(x)$ is close to the true label $y$. On the other hand, it outputs a large number when $f(\vec{x})$ and $y$ are not very close together. Because we want approximations that are closer to the true label, for every data point, we want the value $\mathcal{L}(f, \vec{x}, y)$ to be as small as possible. \\
+As you can see, this (non-negative) function outputs a very small value when the approximation $f(x)$ is close to the true label $y$. On the other hand, it outputs a large number when $f(\vec{x})$ and $y$ are not very close together. Because we want approximations that are closer to the true label, for every data point, we want the value $\mathcal{L}(f, \vec{x}, y)$ to be as small as possible.$$
 
 Now, let's do forward propagation for one data point. If we have a $(\vec{x}, y)$ data point - label pair, we can consolidate the process of getting the approximation and the cost for the approximation as follows:
 
-\begin{equation}
+$$ \begin{equation}
 \tilde{y} = f(x) = 
-\sigma\left(W^{(2)} \cdot R\left(\begin{bmatrix} W^{(1)} \cdot \vec{x} \\ 1\end{bmatrix}\right)\right)
-\end{equation}
+\sigma\left(W^{(2)} \cdot R\left(\begin{bmatrix} W^{(1)} \cdot \vec{x} \newline 1\end{bmatrix}\right)\right)
+\end{equation} $$
 
+$$
 \begin{equation}
 \mathcal{L}\left(y, \tilde{y}\right) = \left(y - \tilde{y}\right)^{2}
-\end{equation}
+\end{equation} $$
 
 Equation (2) might look scary, but it's exactly what we've been discussing this whole time (visualized in Figure 4). Here's a step-by-step breakdown of this forward propagation process: 
 
-\begin{enumerate}
-    \item
+1) We first multiply our input $\vec{x}$ by our first linear transformation $W^{(1)}$, which is what we see in the top-right corner of the equation (3.2.1). You can also see the addition of the `1' in the final entry of the vector, intended to absorb our y-intercept for the first transformation layer (3.2.4). Let's call this new vector (with $W^{(1)}\vec{x}$ in the first entries and "1" in the last entry): "$\vec{z}_1$", as shown in Figure 4. 
+2) Next, we wrap $\vec{z}_1$ with the ReLU activation function, denoted as $R$ for simplicity (3.2.2). Let's call $\vec{z}_1$ after it has been transformed by $R$: ``$\vec{x}_2$".
+3) We then multiply $\vec{x}_2$ with our second weight matrix $W^{(2)}$, to get a scalar quantity $z_2$. We then pass this value through the sigmoid function to get our approximation $f\left(\vec{x}\right) = \tilde{y}$.
+4)  Finally, from equation (3), we get a metric $\mathcal{L}(y, \tilde{y})$ of how good the approximation $\tilde{y}$ is with respect to our desired label, $y$. 
 
-    We first multiply our input $\vec{x}$ by our first linear transformation $W^{(1)}$, which is what we see in the top-right corner of the equation (3.2.1). You can also see the addition of the `1' in the final entry of the vector, intended to absorb our y-intercept for the first transformation layer (3.2.4). Let's call this new vector (with $W^{(1)}\vec{x}$ in the first entries and ``1" in the last entry): ``$\vec{z}_1$", as shown in Figure 4. 
-    
-    \item
 
-    Next, we wrap $\vec{z}_1$ with the ReLU activation function, denoted as $R$ for simplicity (3.2.2). Let's call $\vec{z}_1$ after it has been transformed by $R$: ``$\vec{x}_2$".
-    
-    \item
-
-    We then multiply $\vec{x}_2$ with our second weight matrix $W^{(2)}$, to get a scalar quantity $z_2$. We then pass this value through the sigmoid function to get our approximation $f\left(\vec{x}\right) = \tilde{y}$.
-
-    \item
-
-    Finally, from equation (3), we get a metric $\mathcal{L}(y, \tilde{y})$ of how good the approximation $\tilde{y}$ is with respect to our desired label, $y$.  
-    
-\end{enumerate}
-
-\subsection{Backwards Propagation}
+### Backwards Propagation
 
 If you'll remember from 2.4.3, given a function $f: \mathbb{R}^n \to \mathbb{R}$, starting from the point $\vec{x}$, we need to travel some tiny distance in the (greatest-descent) direction of $-\frac{df}{d\vec{x}}$ in order to find a new spot $\vec{x}'$ that has a smaller value on $f$ than the original spot $\vec{x}$. \\
 
