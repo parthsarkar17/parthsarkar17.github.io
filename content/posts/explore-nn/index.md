@@ -1,10 +1,10 @@
 +++
 title = "A Mathematical Dive Into a Toy Neural Net"
-date = 2024-12-05
+date = 2023-08-26
 draft = false
 
 [taxonomies]
-categories = ["one"]
+categories = ["Things I Also Find Cool"]
 tags = []
 
 [extra]
@@ -183,7 +183,7 @@ If we have a function $f: \mathbb{R}^n \to \mathbb{R}$, we know that $f$ takes i
 
 If you take a tiny step from $\vec{x}$ in the direction $f'(\vec{x})$ (i.e. if you look at some point $\vec{x}' = \vec{x} + \alpha f'(\vec{x})$ for some very small $\alpha > 0$), the function value at this new point is necessarily greater than the function value at the old point. In particular, the gradient of $f$ at $\vec{x}$ points you in the direction of greatest ascent with respect to our function $f$, at the point $\vec{x}$.
 
-Consequently, if you take a tiny step in the opposite direction, you go in the direction of greatest \textit{descent}. This fact will be invaluable in our discussion of minimizing a "cost function" during the process of neural network training.
+Consequently, if you take a tiny step in the opposite direction, you go in the direction of greatest _descent_. This fact will be invaluable in our discussion of minimizing a "cost function" during the process of neural network training.
 
 
 #### Common Gradients
@@ -201,7 +201,7 @@ If you're interested in what makes the Jacobian have this structure in particula
 
 ## The Neural Network
 
-Personally, I find it most valuable to view neural networks as functions, much like the ones we've already seen in the mathematical overview. In the case of neural networks that classify points into one of $k$ distinct categories (rightfully called ``classifiers"), these functions define a set of rules that aim to partition the input space into $k$ different sectors; then, depending on the sector in which a point lies, the function would provide the corresponding classification. Oftentimes, it's too difficult for humans to conjure up these rules ourselves, so we let computers define them for us through a process called ``training". \\
+Personally, I find it most valuable to view neural networks as functions, much like the ones we've already seen in the mathematical overview. In the case of neural networks that classify points into one of $k$ distinct categories (rightfully called "classifiers"), these functions define a set of rules that aim to partition the input space into $k$ different sectors; then, depending on the sector in which a point lies, the function would provide the corresponding classification. Oftentimes, it's too difficult for humans to conjure up these rules ourselves, so we let computers define them for us through a process called "training".
 
 That sounds lovely and all, but what exactly does this object that we're training look like? How do we know that it will even provide the set of rules we're looking for? And, after the structure is solidified, what exactly goes on during this so-called ``training"? Such are the questions that this section will attempt to illuminate. Hold on to your matrices.
 
@@ -316,7 +316,7 @@ $$f\left(\vec{x}\right) = \frac{1}{1 + e^{-W^{(2)}\vec{x}}}$$
 
 This final layer, displayed compactly above, is also called Logistic Regression. In a sense, it provides a kind of "probability" for the correctness of the output. If the model was very sure that a data-point had the classification "1", it would output a value $p \approx 1$ at the end of the network, and this value would also serve as this "probability of correctness". On the other hand, if the model was very sure a data-point was labeled "0", it would output a positive value $p \approx 0$, and the probability of correctness would be $1- p$. It's a handy set up that gives us real-time insight into what the algorithm is thinking on any given data-point.
 
-#### What Are Those Extra ``1"s On Every Layer?
+#### What Are Those Extra "1"s On Every Layer?
 
 This is the part where I admit that I lied about using linear transformations. Well, they _were_ linear transformations, but they were linear transformations on vectors with an additional "1" cryptically placed on the bottom of each vector. Those "1"s actually mean the transformations were _affine_.
 
