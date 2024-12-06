@@ -203,12 +203,12 @@ If you're interested in what makes the Jacobian have this structure in particula
 
 Personally, I find it most valuable to view neural networks as functions, much like the ones we've already seen in the mathematical overview. In the case of neural networks that classify points into one of $k$ distinct categories (rightfully called "classifiers"), these functions define a set of rules that aim to partition the input space into $k$ different sectors; then, depending on the sector in which a point lies, the function would provide the corresponding classification. Oftentimes, it's too difficult for humans to conjure up these rules ourselves, so we let computers define them for us through a process called "training".
 
-That sounds lovely and all, but what exactly does this object that we're training look like? How do we know that it will even provide the set of rules we're looking for? And, after the structure is solidified, what exactly goes on during this so-called ``training"? Such are the questions that this section will attempt to illuminate. Hold on to your matrices.
+That sounds lovely and all, but what exactly does this object that we're training look like? How do we know that it will even provide the set of rules we're looking for? And, after the structure is solidified, what exactly goes on during this so-called "training"? Such are the questions that this section will attempt to illuminate. Hold on to your matrices.
 
-\subsection{Setting Up The Problem}
+### Setting Up The Problem
 
-\subsubsection{Why This Problem?}
-First, let's set up the toy problem that I mentioned in the introduction. The two main reasons that I chose this problem was \textbf{(1)} for its simplicity for human eyes and \textbf{(2)} its lack of linear-separability (you'll see what I mean in just a moment). Historically, despite its seeming simplicity, this second reason has given AI researchers a lot of headaches in the past. The following problem and the model we'll consequently build will shed light on how these researchers' issues were soon patched up.\\
+#### Why This Problem?
+First, let's set up the toy problem that I mentioned in the introduction. The two main reasons that I chose this problem was **(1)** for its simplicity for human eyes and **(2)** its lack of linear-separability (you'll see what I mean in just a moment). Historically, despite its seeming simplicity, this second reason has given AI researchers a lot of headaches in the past. The following problem and the model we'll consequently build will shed light on how these researchers' issues were soon patched up.
 
 For those of you familiar with logic gates, we will be attempting to build a neural network that can classify the Exclusive-OR (XOR) function.
 
@@ -219,7 +219,7 @@ For those of you familiar with logic gates, we will be attempting to build a neu
 | 1     | 0     | 1     |
 | 1     | 1     | 0     |
 
-Indeed, this function does look really simple. But here's what I meant by ``not-linearly-separable":
+Indeed, this function does look really simple. But here's what I meant by "not-linearly-separable":
 
 
 ![alt-text](xor_no_pertub.png)
@@ -405,142 +405,127 @@ $$
 Equation (2) might look scary, but it's exactly what we've been discussing this whole time (visualized in Figure 4). Here's a step-by-step breakdown of this forward propagation process: 
 
 1) We first multiply our input $\vec{x}$ by our first linear transformation $W^{(1)}$, which is what we see in the top-right corner of the equation (3.2.1). You can also see the addition of the `1' in the final entry of the vector, intended to absorb our y-intercept for the first transformation layer (3.2.4). Let's call this new vector (with $W^{(1)}\vec{x}$ in the first entries and "1" in the last entry): "$\vec{z}_1$", as shown in Figure 4. 
-2) Next, we wrap $\vec{z}_1$ with the ReLU activation function, denoted as $R$ for simplicity (3.2.2). Let's call $\vec{z}_1$ after it has been transformed by $R$: ``$\vec{x}_2$".
+2) Next, we wrap $\vec{z}_1$ with the ReLU activation function, denoted as $R$ for simplicity (3.2.2). Let's call $\vec{z}_1$ after it has been transformed by $R$: "$\vec{x}_2$".
 3) We then multiply $\vec{x}_2$ with our second weight matrix $W^{(2)}$, to get a scalar quantity $z_2$. We then pass this value through the sigmoid function to get our approximation $f\left(\vec{x}\right) = \tilde{y}$.
 4)  Finally, from equation (3), we get a metric $\mathcal{L}(y, \tilde{y})$ of how good the approximation $\tilde{y}$ is with respect to our desired label, $y$. 
 
 
 ### Backwards Propagation
 
-If you'll remember from 2.4.3, given a function $f: \mathbb{R}^n \to \mathbb{R}$, starting from the point $\vec{x}$, we need to travel some tiny distance in the (greatest-descent) direction of $-\frac{df}{d\vec{x}}$ in order to find a new spot $\vec{x}'$ that has a smaller value on $f$ than the original spot $\vec{x}$. \\
+If you'll remember from 2.4.3, given a function $f: \mathbb{R}^n \to \mathbb{R}$, starting from the point $\vec{x}$, we need to travel some tiny distance in the (greatest-descent) direction of $-\frac{df}{d\vec{x}}$ in order to find a new spot $\vec{x}'$ that has a smaller value on $f$ than the original spot $\vec{x}$.
 
 Now, you might notice two things:
-    \begin{enumerate}
-        \item
-        For every approximation and true label, we want our cost $\mathcal{L}(y, \tilde{y})$ to be as small as possible. 
-        \item
-        For a single data point $\vec{x}$ with a label $y$, our approximation $\tilde{y}$ depends on the weights we choose, $W^{(1)} \text{ and } W^{(2)}$.
+1) For every approximation and true label, we want our cost $\mathcal{L}(y, \tilde{y})$ to be as small as possible. 
+2)  For a single data point $\vec{x}$ with a label $y$, our approximation $\tilde{y}$ depends on the weights we choose, $W^{(1)}$ and  $W^{(2)}$.
 
-    \end{enumerate}
+Keeping those two things in mind, we can build up the idea behind back propagation. Focus on a single data point, and let our weights start out at some initial $W^{(1)}, W^{(2)}$. If we tweak $W^{(1)}, W^{(2)}$ in some small way, our approximation $\tilde{y}$ will change, and so will our cost $\mathcal{L}(y, \tilde{y})$. _We want to change our weights in the direction that decreases the cost as quickly as possible. Does that sound familiar?_
 
-Keeping those two things in mind, we can build up the idea behind back propagation. Focus on a single data point, and let our weights start out at some initial $W^{(1)}, W^{(2)}$. If we tweak $W^{(1)}, W^{(2)}$ in some small way, our approximation $\tilde{y}$ will change, and so will our cost $\mathcal{L}(y, \tilde{y})$. We want to change our weights in the \textit{direction that decreases the cost as quickly as possible}. Does that sound familiar?\\
+In this case, we fix our input $\vec{x}$, and treat our weights $W^{(1)}, W^{(2)}$ as variables that we can change in order to decrease the cost of the approximation they provide. To be clear, the goal is to find $\frac{d\mathcal{L}}{d W^{(1)}}$ and $\frac{d\mathcal{L}}{d W^{(2)}}$ so we can update the weights in the opposite direction.
 
-In this case, we fix our input $\vec{x}$, and treat our weights $W^{(1)}, W^{(2)}$ as variables that we can change in order to decrease the cost of the approximation they provide. To be clear, the goal is to find $\frac{d\mathcal{L}}{d W^{(1)}}$ and $\frac{d\mathcal{L}}{d W^{(2)}}$ so we can update the weights in the opposite direction. \\
+It might sound complicated to find the best "direction" in which to update our weights, as there seem to be a lot of moving parts. We'll take it step-by-step, with a little help from our friend, the Chain Rule. Here's a recap of notation:
 
-It might sound complicated to find the best ``direction" in which to update our weights, as there seem to be a lot of moving parts. We'll take it step-by-step, with a little help from our friend, the Chain Rule. Here's a recap of notation:\\
-
-% First of all, our cost function is a function of our approximation, which is, in turn, a function of the sigmoid activation, which then houses $W^{(2)}$. Further, the vector with which we multiply $W^{(2)}$ is \textit{also} a function of the ReLU activation, then a strange addition of a ``1" function, and then, finally, our $W^{(1)}$ weight matrix. Where we do we even start? \\
-
-
+$$
 \begin{equation*}
 \tilde{y} = f(x) = 
-\sigma\left(W^{(2)} \cdot R\left(\begin{bmatrix} W^{(1)} \cdot \vec{x} \\ 1\end{bmatrix}\right)\right)
-\end{equation*}
+\sigma\left(W^{(2)} \cdot R\left(\begin{bmatrix} W^{(1)} \cdot \vec{x} \newline 1\end{bmatrix}\right)\right)
+\end{equation*} $$
 
-\[
-\vec{z}_1 = \begin{bmatrix}W^{(1)} \vec{x} \\ 1\end{bmatrix} 
-\,,\;\;
-\vec{x}_2 = R\left(\vec{z}_1\right)
-\,,\;\;
-\vec{z}_2 = W^{(2)}\vec{x}_2
-\,,\;\;
-\tilde{y} = \sigma \left(\vec{z}_2\right)
-\,,\;\; \mathcal{L}(y, \tilde{y}) = \left(y - \tilde{y}\right)^{2}
-\]
+$$
+\vec{z}_1 = \begin{bmatrix}W^{(1)} \vec{x} \newline 1\end{bmatrix} \newline
+\vec{x}_2 = R\left(\vec{z}_1\right) \newline
+\vec{z}_2 = W^{(2)}\vec{x}_2 \newline
+\tilde{y} = \sigma \left(\vec{z}_2\right) \newline
+ \mathcal{L}(y, \tilde{y}) = \left(y - \tilde{y}\right)^{2}
+$$
 We'll break down $\frac{d\mathcal{L}}{d W^{(1)}}$ and $\frac{d\mathcal{L}}{d W^{(2)}}$ in the next two sections.
 
-\subsubsection{Update of Second Weight Layer}
-Let's apply the chain rule to update the second weight layer first, since it's ``closer" to the output of the function than the first weight layer. Here's what the chain rule says:
+#### Update of Second Weight Layer
+Let's apply the chain rule to update the second weight layer first, since it's "closer" to the output of the function than the first weight layer. Here's what the chain rule says:
 
-\[\frac{d\mathcal{L}}{d W^{(2)}} = \frac{d\mathcal{L}}{d \tilde{y}} \cdot \frac{d\tilde{y}}{d\vec{z}_2} \cdot \frac{d\vec{z}_2}{d W^{(2)}}\]
+$$\frac{d\mathcal{L}}{d W^{(2)}} = \frac{d\mathcal{L}}{d \tilde{y}} \cdot \frac{d\tilde{y}}{d\vec{z}_2} \cdot \frac{d\vec{z}_2}{d W^{(2)}}$$
 
 We'll find each of these three terms separately, then find their product to get a result for $\frac{d\mathcal{L}}{d W^{(2)}}$.
+$$
 \begin{align*}
-& \frac{d\mathcal{L}}{d \tilde{y}} = \frac{d}{d \tilde{y}} \left[(\tilde{y} - y)^2\right] = 2 \cdot(\tilde{y} - y) \\
-& \frac{d\tilde{y}}{d\vec{z}_2} = \frac{d}{d\vec{z}_2}\left[\sigma(\vec{z}_2)\right] = \sigma'(\vec{z}_2) \\
+& \frac{d\mathcal{L}}{d \tilde{y}} = \frac{d}{d \tilde{y}} \left[(\tilde{y} - y)^2\right] = 2 \cdot(\tilde{y} - y) \newline
+& \frac{d\tilde{y}}{d\vec{z}_2} = \frac{d}{d\vec{z}_2}\left[\sigma(\vec{z}_2)\right] = \sigma'(\vec{z}_2) \newline
 &\frac{d\vec{z}_2}{d W^{(2)}} = \frac{d}{d W^{(2)}} \left[W^{(2)}\vec{x}_2\right] = \vec{x}_2^{T}
 \end{align*}
+$$
 Putting them together,
-\[\frac{d\mathcal{L}}{d W^{(2)}} = 2(\tilde{y} - y) \cdot \sigma'(\vec{z}_2) \cdot \vec{x}_2^{T}\]
+$$\frac{d\mathcal{L}}{d W^{(2)}} = 2(\tilde{y} - y) \cdot \sigma'(\vec{z}_2) \cdot \vec{x}_2^{T}$$
 Finally, to take a step in the opposite direction of $\frac{d\mathcal{L}}{d W^{(2)}}$, we update $W^{(2)}$ with the following rule:
-\[W^{(2)} \xleftarrow{} W^{(2)} - \alpha \frac{d\mathcal{L}}{d W^{(2)}}\]
-where $\alpha$ is a small, positive, ``learning rate" parameter that defines how big you want your step in the direction $- \frac{d\mathcal{L}}{d W^{(2)}}$ to be.
+$$W^{(2)} \xleftarrow{} W^{(2)} - \alpha \frac{d\mathcal{L}}{d W^{(2)}}$$
+where $\alpha$ is a small, positive, "learning rate" parameter that defines how big you want your step in the direction $- \frac{d\mathcal{L}}{d W^{(2)}}$ to be.
 
-\subsubsection{Update of First Weight Layer}
 
-The update rule of $W^{(1)}$ is slightly more involved. Not only is it ``further back" in the network, unlike $W^{(2)}$ (which is a row vector), $W^{(1)}$ is a 3-by-3 matrix. First, here's what the chain rule says about finding $\frac{d\mathcal{L}}{d W^{(1)}}$: \\
+#### Update of First Weight Layer
 
-\[\frac{d\mathcal{L}}{d W^{(1)}} = \frac{d\mathcal{L}}{d \tilde{y}} \cdot \frac{d\tilde{y}}{d\vec{z}_2} \cdot \frac{d\vec{z}_2}{d \vec{x}_2} \cdot \frac{d\vec{x}_2}{d\vec{z}_1}\cdot \frac{d\vec{z}_1}{d W^{(1)}}\]
+The update rule of $W^{(1)}$ is slightly more involved. Not only is it "further back" in the network, unlike $W^{(2)}$ (which is a row vector), $W^{(1)}$ is a 3-by-3 matrix. First, here's what the chain rule says about finding $\frac{d\mathcal{L}}{d W^{(1)}}$:
 
-Once again, let's calculate each of these components, so we can find their product. \\
-\begin{align*}
-& \frac{d\mathcal{L}}{d \tilde{y}} = \frac{d}{d \tilde{y}} \left[(\tilde{y} - y)^2\right] = 2 \cdot(\tilde{y} - y) \\
-& \frac{d\tilde{y}}{d\vec{z}_2} = \frac{d}{d\vec{z}_2}\left[\sigma(\vec{z}_2)\right] = \sigma'(\vec{z}_2) \\
-&\frac{d\vec{z}_2}{d \vec{x}_2} = \frac{d}{d x_{2}} \left[W^{(2)}\vec{x}_2\right] = W^{(2)}
-\end{align*}
+$$\frac{d\mathcal{L}}{d W^{(1)}} = \frac{d\mathcal{L}}{d \tilde{y}} \cdot \frac{d\tilde{y}}{d\vec{z}_2} \cdot \frac{d\vec{z}_2}{d \vec{x}_2} \cdot \frac{d\vec{x}_2}{d\vec{z}_1}\cdot \frac{d\vec{z}_1}{d W^{(1)}}$$
 
-Those gradients were relatively straightforward to compute. This next one also isn't so bad, but let's walk through it. Remember that $\vec{x}_2 = R\left(\vec{z}_1\right)$, so we're essentially applying the ReLU activation function to each element of vector $\vec{z}_1$. \\
+Once again, let's calculate each of these components, so we can find their product.
+
+$$\frac{d\mathcal{L}}{d \tilde{y}} = \frac{d}{d \tilde{y}} \left[(\tilde{y} - y)^2\right] = 2 \cdot(\tilde{y} - y) \newline \newline
+\frac{d\tilde{y}}{d\vec{z}_2} = \frac{d}{d\vec{z}_2}\left[\sigma(\vec{z}_2)\right] = \sigma'(\vec{z}_2) \newline$$
+$$ \frac{d\vec{z}_2}{d \vec{x}_2} = \frac{d}{d \vec{x}_2} \left[{W^{(2)}\vec{x}_2}\right] = W^{(2)} $$
+
+
+Those gradients were relatively straightforward to compute. This next one also isn't so bad, but let's walk through it. Remember that $\vec{x}_2 = R\left(\vec{z}_1\right)$, so we're essentially applying the ReLU activation function to each element of vector $\vec{z}_1$.
 
 From 2.2.4, in the same way we found the gradient $\frac{dh}{d\vec{x}}$ for our vector-valued function $h: \mathbb{R}^{n} \to \mathbb{R}^n$ that applies a function $\gamma: \mathbb{R} \to \mathbb{R}$ element-wise to a vector input $\vec{x}$, we know:
-\[\frac{d \vec{x}_{1}}{d \vec{z}_1} = \begin{bmatrix}R'(\vec{z}_{1, 1}) & 0 & 0 & 0 \\
-0 & R'(\vec{z}_{1, 2}) & 0 & 0 \\
-0 & 0 & R'(\vec{z}_{1, 3}) & 0 \\
-0 & 0 & 0 & R'(\vec{z}_{1, 4})
-\end{bmatrix}\]
-where $\vec{z}_{1, i}$ is the $i$th element of the vector $\vec{z}_1$. \\
+$$\frac{d\vec{x}_{1}}{d\vec{z}_1} = \begin{bmatrix} R'(\vec{z}_1(1)) & {0} & {0} & {0} \newline 
+0 & R'(\vec{z}_1(2)) & 0 & 0 \newline
+0 & 0 & R'(\vec{z}_1(3)) & 0 \newline
+0 & 0 & 0 & R'(\vec{z}_1(4)) \newline \end{bmatrix}$$
 
-Finally, we're down to the last term: $\frac{d\vec{z}_1}{d W^{(1)}}$. Now, we truly encounter the problem of $W^{(1)}$ being a 3-by-3 matrix. We know that $\vec{z}_1 = \begin{bmatrix}W^{(1)} \vec{x} \\ 1\end{bmatrix}$, but we've only ever done the derivative of a function with respect to a vector; what does it mean to take a derivative of a function with respect to a matrix? \\
+where $\vec{z}_{1}(i)$ is the $i$ th element of the vector $\vec{z}_1$.
 
-I'm not qualified to answer that question, so I decided to do something a little nifty. Let's bring the problem back into my abilities; what if we found a way to think of the matrix $W^{(1)}$ as a vector? \\
+Finally, we're down to the last term: $\frac{d\vec{z}_1}{d W^{(1)}}$. Now, we truly encounter the problem of $W^{(1)}$ being a 3-by-3 matrix. We know that $\vec{z}_1 = \begin{bmatrix}W^{(1)} \vec{x} \\ 1\end{bmatrix}$, but we've only ever done the derivative of a function with respect to a vector; what does it mean to take a derivative of a function with respect to a matrix? 
+
+I'm not qualified to answer that question, so I decided to do something a little nifty. Let's bring the problem back into my abilities; what if we found a way to think of the matrix $W^{(1)}$ as a vector? 
 
 We know that $W^{(1)} \vec{x}$ is a vector, whose $i$th row is the dot-product of $\vec{x}$ with row $i$ of $W^{(1)}$. Because I said so, and because I'm the one writing this, let's take each row of $W^{(1)}$, make them columns, and stack them on top of each other. That makes $W^{(1)}$ into a vector $\vec{w}_1$. In order to get the right result for $W^{(1)} \vec{x}$, we make the vector $\vec{x}$ into a \textit{matrix} $X$, and have it act on our new $\vec{w}_1$. Here's what I mean:
 
-\[W^{(1)} \vec{x} = 
+$$W^{(1)} \vec{x} = 
 \begin{bmatrix} W^{(1)}_{1, 1} &  W^{(1)}_{1, 2} & W^{(1)}_{1, 3} \\ W^{(1)}_{2, 1} &  W^{(1)}_{2, 2} & W^{(1)}_{2, 3} \\
 W^{(1)}_{3, 1} &  W^{(1)}_{3, 2} & W^{(1)}_{3, 3}
 \end{bmatrix}
 \begin{bmatrix}
 \vec{x}_{1,1} \\ \vec{x}_{1,2} \\ \vec{x}_{1,3}
-\end{bmatrix}
-\]
-\[
-= \begin{bmatrix}
+\end{bmatrix}$$ 
+$$ = \begin{bmatrix}
 \vec{x}_{1,1} & \vec{x}_{1,2} & \vec{x}_{1,3} & 0 & 0 & 0 & 0 & 0 & 0\\
   0 & 0 & 0 & \vec{x}_{1,1} & \vec{x}_{1,2} & \vec{x}_{1,3}& 0 & 0 & 0 \\
   0 & 0 & 0 & 0 & 0 & 0 & \vec{x}_{1,1} & \vec{x}_{1,2} & \vec{x}_{1,3}
 \end{bmatrix}
 \begin{bmatrix} W^{(1)}_{1, 1} \\  W^{(1)}_{1, 2} \\ W^{(1)}_{1, 3} \\ \vdots 
  \\ W^{(1)}_{3, 1}\\ W^{(1)}_{3, 2} \\ W^{(1)}_{3, 3}
-\end{bmatrix} = X \vec{w}_1
-\]
+\end{bmatrix} = X \vec{w}_1 $$
 
 Now, we can re-form our function to say: $\vec{z}_1 = \begin{bmatrix}X \vec{w}_1 \\ 1\end{bmatrix}$. Let's use an intermediary variable $\vec{q} = X \vec{w}_1$, and let's find $\frac{d\vec{z}_1}{d\vec{w}_1}$. \\
 
-By the Jacobian rule, we know: $$\frac{d \vec{z}_1}{d \vec{q}} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 0 & 0\end{bmatrix}$$
+By the Jacobian rule, we know: $$\frac{d \vec{z}_1}{d \vec{q}} = \begin{bmatrix} 1 & 0 & 0 \newline 0 & 1 & 0 \newline 0 & 0 & 1 \newline 0 & 0 & 0\end{bmatrix}$$
 
 By our common gradients, we know: $$\frac{d \vec{q}}{d \vec{w}_1} = X$$ Putting them together, we know:
-$\frac{d \vec{z}_1}{d \vec{w}_1} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 0 & 0\end{bmatrix} X$. \\
+$\frac{d \vec{z}_1}{d \vec{w}_1} = \begin{bmatrix} 1 & 0 & 0 \newline 0 & 1 & 0 \newline 0 & 0 & 1 \newline 0 & 0 & 0\end{bmatrix} X$.
 
 And that's it! We computed all five of the derivatives we need to find $\frac{d \mathcal{L}}{d W^{(1)}}$. Putting it all together, we find:
 
-\[\frac{d\mathcal{L}}{d \vec{w}_1} = \frac{d\mathcal{L}}{d \tilde{y}} \cdot \frac{d\tilde{y}}{d\vec{z}_2} \cdot \frac{d\vec{z}_2}{d \vec{x}_2} \cdot \frac{d\vec{x}_2}{d\vec{z}_1}\cdot \frac{d\vec{z}_1}{d \vec{w}_1} = \] 
+$$\frac{d\mathcal{L}}{d \vec{w}_1} = \frac{d\mathcal{L}}{d \tilde{y}} \cdot \frac{d\tilde{y}}{d\vec{z}_2} \cdot \frac{d\vec{z}_2}{d \vec{x}_2} \cdot \frac{d\vec{x}_2}{d\vec{z}_1}\cdot \frac{d\vec{z}_1}{d \vec{w}_1} = $$
 
-\[2 (\tilde{y} - y) \cdot \sigma'(\vec{z}_2) \cdot W^{(2)} \cdot \begin{bmatrix}R'(\vec{z}_{1, 1}) & 0 & 0 & 0 \\
-0 & R'(\vec{z}_{1, 2}) & 0 & 0 \\
-0 & 0 & R'(\vec{z}_{1, 3}) & 0 \\
+$$2 (\tilde{y} - y) \cdot \sigma'(\vec{z}_2) \cdot W^{(2)} \cdot \begin{bmatrix}R'(\vec{z}_{1, 1}) & 0 & 0 & 0 \newline
+0 & R'(\vec{z}_{1, 2}) & 0 & 0 \newline
+0 & 0 & R'(\vec{z}_{1, 3}) & 0 \newlnie
 0 & 0 & 0 & R'(\vec{z}_{1, 4})
-\end{bmatrix}\cdot \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 0 & 0\end{bmatrix} X\]
-\[ = 2 (\tilde{y} - y) \cdot \sigma'(\vec{z}_2) \cdot W^{(2)} \cdot \begin{bmatrix}R'(\vec{z}_{1, 1}) & 0 & 0 \\
-0 & R'(\vec{z}_{1, 2}) & 0  \\
-0 & 0 & R'(\vec{z}_{1, 3})  \\
+\end{bmatrix}\cdot \begin{bmatrix} 1 & 0 & 0 \newline 0 & 1 & 0 \newline 0 & 0 & 1 \newline 0 & 0 & 0\end{bmatrix} X $$
+$$ = 2 (\tilde{y} - y) \cdot \sigma'(\vec{z}_2) \cdot W^{(2)} \cdot \begin{bmatrix}R'(\vec{z}_{1, 1}) & 0 & 0 \newline
+0 & R'(\vec{z}_{1, 2}) & 0  \newline
+0 & 0 & R'(\vec{z}_{1, 3})  \newline
 0 & 0 & 0 
-\end{bmatrix}\cdot X\]
+\end{bmatrix}\cdot X $$
 
 Computing $\frac{\mathcal{L}}{d W^{(1)}}$ from $\frac{d\mathcal{L}}{d \vec{w}_1}$ is easy. The result we get above is $\frac{d\mathcal{L}}{d \vec{w}_1}$, which is a row vector. To make this back into a matrix, take the first three terms as the first row, the second three terms as the second row, and the final three terms as the final row. Again, update with the rule:
 
-\[W^{(1)} \xleftarrow{} W^{(1)} - \alpha \frac{d\mathcal{L}}{d W^{(1)}}\]
-
-% Because $W^{(1)}$ is a 3-by-3 matrix and $\vec{x}$ is a 3-by-1 vector, we know $W^{(1)}\vec{x}$ is also a 3-by-1 vector. But
-
-
-\end{document}
+$$W^{(1)} \xleftarrow{} W^{(1)} - \alpha \frac{d\mathcal{L}}{d W^{(1)}}$$
