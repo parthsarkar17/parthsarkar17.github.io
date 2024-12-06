@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>My Blog</title>
+	<subtitle>My blog site.</subtitle>
+	<link href="https://parthsarkar17.github.io/posts/feed.xml" rel="self" type="application/atom+xml"/>
+    <link href="https://parthsarkar17.github.io/posts/"/>
+	<updated>2024-12-05T00:00:00+00:00</updated>
+	<id>https://parthsarkar17.github.io/posts/feed.xml</id>
+	<entry xml:lang="en">
+		<title>What I Think About When I Think About FSMs</title>
+		<published>2024-12-05T00:00:00+00:00</published>
+		<updated>2024-12-05T00:00:00+00:00</updated>
+		<link href="https://parthsarkar17.github.io/posts/fsms/" type="text/html"/>
+		<id>https://parthsarkar17.github.io/posts/fsms/</id>
+		<content type="html">&lt;p&gt;draft... check back in later pls&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>A Mathematical Dive Into a Toy Neural Net</title>
+		<published>2023-08-26T00:00:00+00:00</published>
+		<updated>2023-08-26T00:00:00+00:00</updated>
+		<link href="https://parthsarkar17.github.io/posts/explore-nn/" type="text/html"/>
+		<id>https://parthsarkar17.github.io/posts/explore-nn/</id>
+		<content type="html">&lt;p&gt;&lt;em&gt;This post was adapted from a document I wrote in August 2023 for new members of my engineering project team,
+&lt;a rel=&quot;nofollow noreferrer&quot; href=&quot;https:&#x2F;&#x2F;cuair.org&#x2F;&quot;&gt;CUAir&lt;&#x2F;a&gt;. My subteam, in particular, writes ML models for computer vision tasks. I thought this
+would be a cool intro to our work.&lt;&#x2F;em&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;introduction&quot;&gt;Introduction&lt;a class=&quot;zola-anchor&quot; href=&quot;#introduction&quot; aria-label=&quot;Anchor link for: introduction&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h2&gt;
+&lt;p&gt;I think it would be difficult for me to overstate the prevalence of neural networks. Truthfully, they have been an enigma to me for more time than I care to admit, particularly as a member of &lt;a rel=&quot;nofollow noreferrer&quot; href=&quot;https:&#x2F;&#x2F;cuair.org&#x2F;intelligent-systems.html&quot;&gt;IntSys&lt;&#x2F;a&gt;. That said, this little secret made my journey of discovery all the more gratifying, which is why I wanted to share it.&lt;&#x2F;p&gt;
+&lt;p&gt;Through a toy example, I hope to show you all the ingenious foundations of the neural network. Even through this small example, all the key components are there; even the littlest of these things provide a spectrum of delightful discoveries. Each piece plays a key role, and all of its components are grounded in rigorous math, so I promise I won&#x27;t throw a bunch of fluff at you. At the same time, it&#x27;s my goal to make every decision and design choice as intuitive as possible; from there, I hope you&#x27;ll find the journey as insightful as I did.&lt;&#x2F;p&gt;
+&lt;p&gt;Onwards!&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;mathematics-you-might-find-useful&quot;&gt;Mathematics You Might Find Useful&lt;a class=&quot;zola-anchor&quot; href=&quot;#mathematics-you-might-find-useful&quot; aria-label=&quot;Anchor link for: mathematics-you-might-find-useful&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h2&gt;
+&lt;p&gt;If this is your first introduction to these topics, welcome! If you&#x27;re just re-familiarizing yourself with them, that&#x27;s great too. Come back to these sections as you see fit.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;vectors&quot;&gt;Vectors&lt;a class=&quot;zola-anchor&quot; href=&quot;#vectors&quot; aria-label=&quot;Anchor link for: vectors&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;p&gt;For our purposes, it will be helpful to think of vectors in two ways, interchanging between the two as the need arises: the literal and the geometric perspectives.&lt;&#x2F;p&gt;
+&lt;p&gt;Literally, a vector is a list of numbers, ordered top-to-bottom in a column. Geometrically, the number in each row inhabits a &quot;dimension&quot; along an axis. You can think about each row of a vector capturing how &quot;much&quot; of each dimension the vector would like, axis-by-axis, before placing its dot down in space.&lt;&#x2F;p&gt;
+&lt;p&gt;Here&#x27;s an example of a vector $ \vec{v} = \begin{bmatrix} 4  \newline 1  \newline 2 \end{bmatrix} $ in space.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;parthsarkar17.github.io&#x2F;posts&#x2F;explore-nn&#x2F;vector.png&quot; alt=&quot;alt text&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;If a vector has $n$ dimensions, we say the vector $\vec{x}$ exists in $\mathbb{R}^n$, or: $\vec{x} \in \mathbb{R}^n$.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;functions&quot;&gt;Functions&lt;a class=&quot;zola-anchor&quot; href=&quot;#functions&quot; aria-label=&quot;Anchor link for: functions&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;p&gt;In the most abstract sense, a function is a way to connect the elements from one set to the elements from another set. Each set could contain pretty much anything; the function&#x27;s job is solely to define a bunch of rules that take elements from the first set, and attach them to elements from the second set.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;1-d-functions&quot;&gt;1-D Functions&lt;a class=&quot;zola-anchor&quot; href=&quot;#1-d-functions&quot; aria-label=&quot;Anchor link for: 1-d-functions&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h4&gt;
+&lt;p&gt;We&#x27;re used to these. These are functions like $f(x) = x^2$, or $f(x) = e^x$. In both of these cases, the sets being mapped from and to are both the real numbers $\mathbb{R}$. There is exactly one input and exactly one output. We denote these types of functions as $f: \mathbb{R} \to \mathbb{R}$.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;multi-dimensional-functions&quot;&gt;Multi-Dimensional Functions&lt;a class=&quot;zola-anchor&quot; href=&quot;#multi-dimensional-functions&quot; aria-label=&quot;Anchor link for: multi-dimensional-functions&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h4&gt;
+&lt;p&gt;These functions are a little more needy, in that they take in multiple inputs and often produce multiple outputs. They&#x27;re not much different than normal 1-D functions; they just define a few more rules that include a few more variables. For example:&lt;&#x2F;p&gt;
+&lt;p&gt;$$ x_3 = f(x_1,x_2) = x_1^2 + x_2^2 $$&lt;&#x2F;p&gt;
+&lt;p&gt;defines a paraboloid in $\mathbb{R}^3$ (a 3-D parabola). This is a function that fits the description &quot;$f: \mathbb{R}^2 \to \mathbb{R}$&quot; because it takes two numbers (or, equivalently, a 2-D vector) and outputs a scalar, real value.&lt;&#x2F;p&gt;
+&lt;p&gt;Next, we can define any function that takes an $n$-D vector as an input and outputs an $m$-D vector: $f: \mathbb{R}^n \to \mathbb{R}^m$. In fact, because the output is an $m$-D vector, we can break down the function row-by-row into $m$ separate functions, as shown:&lt;&#x2F;p&gt;
+&lt;p&gt;$$\vec{y} = f\left(\vec{x}\right) = \begin{bmatrix} f_{1}\left(\vec{x}\right) \newline f_{2}\left(\vec{x}\right) \newline  \vdots \newline  f_{m}\left(\vec{x}\right)\end{bmatrix}$$&lt;&#x2F;p&gt;
+&lt;p&gt;Here&#x27;s a small, 2-D to 2-D example.&lt;&#x2F;p&gt;
+&lt;p&gt;$$ \begin{equation}
+f\left(\vec{x}\right) = \begin{bmatrix} \cos(x_1) + \sin (x_2) \newline \sqrt{x_1^2 + x_2^2}\end{bmatrix}
+\end{equation} $$&lt;&#x2F;p&gt;
+&lt;p&gt;We&#x27;ll soon see that this notation is very powerful in constructing something called the Jacobian matrix (briefly, it&#x27;s a multi-dimensional derivative). More on that later.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;injectivity-and-surjectivity&quot;&gt;Injectivity and Surjectivity&lt;a class=&quot;zola-anchor&quot; href=&quot;#injectivity-and-surjectivity&quot; aria-label=&quot;Anchor link for: injectivity-and-surjectivity&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h4&gt;
+&lt;p&gt;This section highlights classifications that could describe any type of function, regardless of the sets on which they define rules.&lt;&#x2F;p&gt;
+&lt;p&gt;Generally, a function is injective if it &quot;preserves the distinctness&quot; of the input values when matching them to output values. This means that no two input values can be tied to the same output. Another word for an injective function is &quot;one-to-one&quot;, which properly captures this idea of preserving distinctness. Importantly, preserving distinctness means that, given a certain output of the function, it is possible to backtrack and find the &lt;em&gt;single&lt;&#x2F;em&gt; original input that produced that output (i.e. in some sense, an inverse of the function exists).&lt;&#x2F;p&gt;
+&lt;p&gt;This is not necessarily the case with surjective functions, which instead assert that every possible output of the function must have at least one input tied to it. So, this property is unbothered by the fact that many inputs could be tied to the same output. Importantly, this means that it is \textbf{not} always possible to trace back to exactly one original input for a given function output. Surjective functions can &quot;squashify&quot; the first set onto a smaller or equally-sized second set. This is why surjective functions are also called &quot;onto&quot; functions.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;linear-operators&quot;&gt;Linear Operators&lt;a class=&quot;zola-anchor&quot; href=&quot;#linear-operators&quot; aria-label=&quot;Anchor link for: linear-operators&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h4&gt;
+&lt;p&gt;&quot;Operator&quot; is another word for &quot;function&quot;, and I think it makes for a cool-sounding sub-title. Here is the formal definition of what it means for an operator to be linear: given some operator $T$, input variables $x_1, x_2$, and any scalar quantity $a$, the function $T$ is a linear operator if and only if&lt;&#x2F;p&gt;
+&lt;p&gt;$$T(x_1 + x_2) = T(x_1) + T(x_2)$$
+$$T(a\cdot x_1) = a\cdot T(x_1)$$&lt;&#x2F;p&gt;
+&lt;p&gt;are both true. To many of you, this definition might seem like a mild betrayal; the two conditions above mean the classic function of the 1-D line, $f(x) = mx + b$, is \textbf{not} a linear function for $b \neq 0$. We can see that neither condition holds, unless $b = 0$. It is an example of an &quot;affine&quot; function, which is a linear function that has been offset by the addition of some number.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;matrices&quot;&gt;Matrices&lt;a class=&quot;zola-anchor&quot; href=&quot;#matrices&quot; aria-label=&quot;Anchor link for: matrices&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h4&gt;
+&lt;p&gt;Matrices are gentle giants. As with vectors, they have several characterizations that will each be valuable in different contexts. Literally, matrices are an array of numbers, ordered by rows and columns. For example, here is a $3\times 4$ matrix $A$. We say $A \in \mathbb{R}^{3 \times 4}$ because it has 3 rows and 4 columns, populated with real-numbered values:&lt;&#x2F;p&gt;
+&lt;p&gt;$$A = \begin{bmatrix}
+1 &amp;amp; 2 &amp;amp; 3 &amp;amp; 4 \newline
+5 &amp;amp; 6 &amp;amp; 7 &amp;amp; 8 \newline
+9 &amp;amp; 10 &amp;amp; 11 &amp;amp; 12
+\end{bmatrix}$$&lt;&#x2F;p&gt;
+&lt;p&gt;We index the elements of the matrix as follows: $A_{ij}$ refers to the element in the $i$th row and the $j$th column of A. So $A_{2, 3} = 7$.&lt;&#x2F;p&gt;
+&lt;p&gt;Here is the more insightful perspective to hold on matrices: they are a type of linear operator. They take in vectors, and output other vectors. Let&#x27;s take our matrix $A$ from earlier, and create a function out of it. It takes in a vector $\vec{x}$ and outputs a vector $\vec{y}$:
+$$\vec{y} = f(\vec{x}) = A\vec{x}$$
+Here&#x27;s how you multiply vectors and matrices: &lt;strong&gt;1)&lt;&#x2F;strong&gt; Always keep the vector to the right of the matrix. &lt;strong&gt;2)&lt;&#x2F;strong&gt; Pick your vector up vertically, flip it counterclockwise $90^{\circ}$ till it&#x27;s horizontal. &lt;strong&gt;3)&lt;&#x2F;strong&gt; For each row of the matrix, multiply each dimension of the vector with the corresponding entry of the row of the matrix. &lt;strong&gt;4)&lt;&#x2F;strong&gt; Add up these element-wise products for each row. &lt;strong&gt;5)&lt;&#x2F;strong&gt; Repeat for all the rows. Here&#x27;s an example:&lt;&#x2F;p&gt;
+&lt;p&gt;$$ \begin{equation*}\vec{y} = f\left(\begin{bmatrix} x_1 \newline x_2 \newline x_3 \newline x_4\end{bmatrix}\right) = \begin{bmatrix}
+1 &amp;amp; 2 &amp;amp; 3 &amp;amp; 4 \newline
+5 &amp;amp; 6 &amp;amp; 7 &amp;amp; 8 \newline
+9 &amp;amp; 10 &amp;amp; 11 &amp;amp; 12 \end{bmatrix}\begin{bmatrix} x_1 \ x_2 \ x_3 \ x_4\end{bmatrix} = \begin{bmatrix}
+x_1 + 2x_2 + 3x_3 + 4x_4 \newline
+5x_1 + 6x_2 + 7x_3 + 8x_4 \newline
+9x_1 + 10x_2 + 11x_3 + 12x_4 \end{bmatrix}\end{equation*} $$&lt;&#x2F;p&gt;
+&lt;p&gt;Notice that $f: \mathbb{R}^4 \to \mathbb{R}^3$ takes in a four-dimensional vector, and outputs a three-dimensional vector. Notice also that this means that $f$ &lt;strong&gt;cannot&lt;&#x2F;strong&gt; be an injective function; the matrix compresses four dimensions into three dimensions, so it is impossible to preserve the distinctness of all input vectors.&lt;&#x2F;p&gt;
+&lt;p&gt;Follow-up: does any linear function from higher to lower dimensions need to be surjective? Take a moment to ponder...&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;&#x2F;strong&gt; if you want to multiply two matrices, it&#x27;s not too different from steps &lt;strong&gt;1-5&lt;&#x2F;strong&gt; listed above. The product of two matrices is another matrix. You treat every column of the matrix on the right as a vector, and go through all five steps for each column, placing these new columns left-to-right in a new matrix.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;more-on-matrices-as-linear-operators&quot;&gt;More On Matrices as Linear Operators&lt;a class=&quot;zola-anchor&quot; href=&quot;#more-on-matrices-as-linear-operators&quot; aria-label=&quot;Anchor link for: more-on-matrices-as-linear-operators&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h4&gt;
+&lt;p&gt;Associated with interpreting them as linear functions, here&#x27;s another useful perspective on matrices: a preserver or destroyer of information.&lt;&#x2F;p&gt;
+&lt;p&gt;First, what do I mean by &quot;information&quot;? I mean the dimension (or &quot;size&quot;) of the spaces on which input vectors and output vectors of matrices lie. For example, the space of input vectors for matrix $A$ from the section above was all of $\mathbb{R}^4$, so its input space was of &quot;size&quot; 4.&lt;&#x2F;p&gt;
+&lt;p&gt;You might be thinking that, because the matrix $A$ outputs vectors in $\mathbb{R}^3$, the output space of $A$ is three-dimensional. This actually isn&#x27;t the case.&lt;&#x2F;p&gt;
+&lt;p&gt;In fact, the outputs of $A$ lie on a two-dimensional &quot;sub-space&quot; of $\mathbb{R}^3$, often known as a &quot;plane&quot;. In the same way that every point on a 1-D line in $\mathbb{R}^2$ is defined by a 2-D vector, this sub-space plane is two dimensional while being composed of three-dimensional vectors.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;parthsarkar17.github.io&#x2F;posts&#x2F;explore-nn&#x2F;plane.png&quot; alt=&quot;alt text&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;We can safely ignore the details of the specific output plane. The important part is that matrices can destroy and preserve as much information as we allow them to. In this case, $A$ projects four dimensions onto two dimensions; it collapses two dimensions&#x27; worth of information.&lt;&#x2F;p&gt;
+&lt;p&gt;Importantly, it is impossible for matrices to &quot;create&quot; information. For example, they cannot take an input space of one dimension and transform it into an output space of two dimensions. Matrices are not in the business of telling lines how to add enough information to become planes; they merely instruct the line to lose information or transform itself to another line. This idea is central to why neural networks are necessary in the first place.&lt;&#x2F;p&gt;
+&lt;p&gt;By reading this, you&#x27;ve hit on core linear algebra topics, like &quot;rank&quot; and &quot;sub-space transformations&quot;. The notion of information preservation is both interesting and an enlightening perspective to hold while learning linear algebra; if you found these topics interesting, I encourage you to reach out or look for more resources online.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;gradients&quot;&gt;Gradients&lt;a class=&quot;zola-anchor&quot; href=&quot;#gradients&quot; aria-label=&quot;Anchor link for: gradients&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;p&gt;Although typically challenging to visualize, gradients are nothing more than derivatives on functions of any dimension. Let&#x27;s take the following function:&lt;&#x2F;p&gt;
+&lt;p&gt;$$G\left(\vec{x}\right) = \begin{bmatrix} G_{1}\left(\vec{x}\right) \newline G_{2}\left(\vec{x}\right) \newline \vdots \newline G_{m}\left(\vec{x}\right)\end{bmatrix}$$&lt;&#x2F;p&gt;
+&lt;p&gt;The gradient (Jacobian) of $G$ with respect to $\vec{x}$ is:&lt;&#x2F;p&gt;
+&lt;p&gt;$$\frac{dG}{d\vec{x}} = \begin{bmatrix}
+\frac{\partial G_1}{\partial x_1} &amp;amp; ... &amp;amp; \frac{\partial G_1}{\partial x_n} \newline
+\vdots &amp;amp; \ddots &amp;amp; \vdots \newline
+\frac{\partial G_m}{\partial x_1} &amp;amp; ... &amp;amp; \frac{\partial G_m}{\partial x_n}
+\end{bmatrix}
+$$&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;example&quot;&gt;Example&lt;a class=&quot;zola-anchor&quot; href=&quot;#example&quot; aria-label=&quot;Anchor link for: example&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h4&gt;
+&lt;p&gt;Let&#x27;s do a quick computation using this definition. From 2.2.2, take our example function $f: \mathbb{R}^2 \to \mathbb{R}^2$:
+$$ f\left(\vec{x}\right) = \begin{bmatrix} \cos(x_1) + \sin (x_2) \newline \sqrt{x_1^2 + x_2^2}\end{bmatrix} $$&lt;&#x2F;p&gt;
+&lt;p&gt;So, $f_1\left(\vec{x}\right) = \cos(x_1) + \sin (x_2)$ and $f_2\left(\vec{x}\right) = \sqrt{x_1^2 + x_2^2}$. We can then compute the partial derivatives:&lt;&#x2F;p&gt;
+&lt;p&gt;$$\frac{\partial f_1}{\partial x_1} = -\sin(x_1), \frac{\partial f_1}{\partial x_2} = \cos(x_1)$$
+$$\frac{\partial f_2}{\partial x_1} = \frac{x_1}{\sqrt{x_1^2 + x_2^2}},  \frac{\partial f_2}{\partial x_2} = \frac{x_2}{\sqrt{x_1^2 + x_2^2}}$$&lt;&#x2F;p&gt;
+&lt;p&gt;Then, the Jacobian of $f$ is as follows:&lt;&#x2F;p&gt;
+&lt;p&gt;$$\frac{df}{d\vec{x}} \left(\begin{bmatrix}x_1 \newline x_2\end{bmatrix}\right) = \begin{bmatrix} -\sin(x_1) &amp;amp; \cos(x_1) \newline \frac{x_1}{\sqrt{x_1^2 + x_2^2}} &amp;amp; \frac{x_2}{\sqrt{x_1^2 + x_2^2}}\end{bmatrix}$$&lt;&#x2F;p&gt;
+&lt;p&gt;Following these same steps, notice that the Jacobian of any linear operation (something like $f\left(\vec{x}\right) = A\vec{x}$) is just the matrix $A$.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;the-chain-rule&quot;&gt;The Chain Rule&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-chain-rule&quot; aria-label=&quot;Anchor link for: the-chain-rule&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h4&gt;
+&lt;p&gt;Here&#x27;s a gentle reminder that this rule does, in fact, exist. This is the rule you learned in single variable calculus: given three functions $f: \mathbb{R} \to \mathbb{R}$,  $g: \mathbb{R} \to \mathbb{R}$, and $h: \mathbb{R} \to \mathbb{R}$ such that:
+$$h(x) = f(g(x))$$
+the derivative of $h$ with respect to $x$ is given by:
+$$h&#x27;(x) = f&#x27;(g(x)) \cdot g&#x27;(x)$$&lt;&#x2F;p&gt;
+&lt;p&gt;It&#x27;s really the same for functions $f, g, h: \mathbb{R}^n \to \mathbb{R}^m$, except $f&#x27;, g&#x27;, h&#x27;$ are all Jacobian matrices that you multiply together. This rule is fundamental to how neural networks work, so keep it front and center.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;direction-of-ascent-and-descent&quot;&gt;Direction of Ascent and Descent&lt;a class=&quot;zola-anchor&quot; href=&quot;#direction-of-ascent-and-descent&quot; aria-label=&quot;Anchor link for: direction-of-ascent-and-descent&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h4&gt;
+&lt;p&gt;If we have a function $f: \mathbb{R}^n \to \mathbb{R}$, we know that $f$ takes in a vector $\vec{x}\in\mathbb{R}^n$ and that the gradient of $f$ at the point $\vec{x}$, denoted $f&#x27;(\vec{x})$, is also a vector in $\mathbb{R}^n$. The point $\vec{x}$ is currently either under or over some multi-dimensional curve called $f$; the function descends &quot;upwards&quot; in some directions and &quot;downwards&quot; in others.&lt;&#x2F;p&gt;
+&lt;p&gt;If you take a tiny step from $\vec{x}$ in the direction $f&#x27;(\vec{x})$ (i.e. if you look at some point $\vec{x}&#x27; = \vec{x} + \alpha f&#x27;(\vec{x})$ for some very small $\alpha &amp;gt; 0$), the function value at this new point is necessarily greater than the function value at the old point. In particular, the gradient of $f$ at $\vec{x}$ points you in the direction of greatest ascent with respect to our function $f$, at the point $\vec{x}$.&lt;&#x2F;p&gt;
+&lt;p&gt;Consequently, if you take a tiny step in the opposite direction, you go in the direction of greatest &lt;em&gt;descent&lt;&#x2F;em&gt;. This fact will be invaluable in our discussion of minimizing a &quot;cost function&quot; during the process of neural network training.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;common-gradients&quot;&gt;Common Gradients&lt;a class=&quot;zola-anchor&quot; href=&quot;#common-gradients&quot; aria-label=&quot;Anchor link for: common-gradients&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h4&gt;
+&lt;p&gt;Here are a list of common functions and their gradients that one might encounter in the wild. The function $g$ uses a dot product, and the function $h$ uses an element-wise application of a 1-D function $\gamma: \mathbb{R} \to \mathbb{R}$.&lt;&#x2F;p&gt;
+&lt;p&gt;$$f\left(\vec{x}\right) = A\vec{x}, g\left(\vec{x}\right) = \vec{c} \cdot \vec{x} = \vec{x} \cdot \vec{c}, h\left(\vec{x}\right) = \begin{bmatrix}\gamma(x_1) \newline \gamma(x_2) \newline \vdots \newline \gamma(x_n)\end{bmatrix}$$&lt;&#x2F;p&gt;
+&lt;p&gt;$$\frac{df}{d\vec{x}} = A,\frac{dg}{d\vec{x}} = c^{T},  \frac{dh}{d\vec{x}} = \begin{bmatrix}\gamma&#x27;(x_1) &amp;amp; 0 &amp;amp; ... &amp;amp; 0 \newline
+0 &amp;amp; \gamma&#x27;(x_2) &amp;amp; ... &amp;amp; 0 \newline
+\vdots &amp;amp; \vdots &amp;amp; \ddots &amp;amp;\vdots \newline
+0 &amp;amp; 0 &amp;amp; ... &amp;amp; \gamma&#x27;(x_n)
+\end{bmatrix}$$&lt;&#x2F;p&gt;
+&lt;p&gt;If you&#x27;re interested in what makes the Jacobian have this structure in particular, reach out! It&#x27;s very fascinating, but it&#x27;s unfortunately out of scope for this explanation.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-neural-network&quot;&gt;The Neural Network&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-neural-network&quot; aria-label=&quot;Anchor link for: the-neural-network&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h2&gt;
+&lt;p&gt;Personally, I find it most valuable to view neural networks as functions, much like the ones we&#x27;ve already seen in the mathematical overview. In the case of neural networks that classify points into one of $k$ distinct categories (rightfully called &quot;classifiers&quot;), these functions define a set of rules that aim to partition the input space into $k$ different sectors; then, depending on the sector in which a point lies, the function would provide the corresponding classification. Oftentimes, it&#x27;s too difficult for humans to conjure up these rules ourselves, so we let computers define them for us through a process called &quot;training&quot;.&lt;&#x2F;p&gt;
+&lt;p&gt;That sounds lovely and all, but what exactly does this object that we&#x27;re training look like? How do we know that it will even provide the set of rules we&#x27;re looking for? And, after the structure is solidified, what exactly goes on during this so-called &quot;training&quot;? Such are the questions that this section will attempt to illuminate. Hold on to your matrices.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;setting-up-the-problem&quot;&gt;Setting Up The Problem&lt;a class=&quot;zola-anchor&quot; href=&quot;#setting-up-the-problem&quot; aria-label=&quot;Anchor link for: setting-up-the-problem&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;h4 id=&quot;why-this-problem&quot;&gt;Why This Problem?&lt;a class=&quot;zola-anchor&quot; href=&quot;#why-this-problem&quot; aria-label=&quot;Anchor link for: why-this-problem&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h4&gt;
+&lt;p&gt;First, let&#x27;s set up the toy problem that I mentioned in the introduction. The two main reasons that I chose this problem was &lt;strong&gt;(1)&lt;&#x2F;strong&gt; for its simplicity for human eyes and &lt;strong&gt;(2)&lt;&#x2F;strong&gt; its lack of linear-separability (you&#x27;ll see what I mean in just a moment). Historically, despite its seeming simplicity, this second reason has given AI researchers a lot of headaches in the past. The following problem and the model we&#x27;ll consequently build will shed light on how these researchers&#x27; issues were soon patched up.&lt;&#x2F;p&gt;
+&lt;p&gt;For those of you familiar with logic gates, we will be attempting to build a neural network that can classify the Exclusive-OR (XOR) function.&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;$i_1$&lt;&#x2F;th&gt;&lt;th&gt;$i_2$&lt;&#x2F;th&gt;&lt;th&gt;$y$&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;0&lt;&#x2F;td&gt;&lt;td&gt;0&lt;&#x2F;td&gt;&lt;td&gt;0&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;0&lt;&#x2F;td&gt;&lt;td&gt;1&lt;&#x2F;td&gt;&lt;td&gt;1&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;1&lt;&#x2F;td&gt;&lt;td&gt;0&lt;&#x2F;td&gt;&lt;td&gt;1&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;1&lt;&#x2F;td&gt;&lt;td&gt;1&lt;&#x2F;td&gt;&lt;td&gt;0&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;p&gt;Indeed, this function does look really simple. But here&#x27;s what I meant by &quot;not-linearly-separable&quot;:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;parthsarkar17.github.io&#x2F;posts&#x2F;explore-nn&#x2F;xor_no_pertub.png&quot; alt=&quot;alt-text&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Try finding a single line that can separate the orange-classified points from the blue-classified points. It&#x27;s impossible! In other words, you&#x27;re going to need some sort of non-linear (curved) decision boundary in order to specify the sectors of this space to which you&#x27;d like orange and blue points to belong. Getting computers to create this curved boundary for us is what challenged researchers for years. For us, neural networks will do exactly this.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Keep in mind:&lt;&#x2F;strong&gt; computers can very easily create linear decision boundaries. That is, given some linearly-separable data, they can find a hyper-plane through space such that the points lying on one side of the plane are classified as &quot;0&quot; and points on the other side are classified as &quot;1&quot;. There are many algorithms for this, such as Support Vector Machines, the Perceptron, and Logistic Regression. Fancy names, but their fundamental idea is that they create this dividing plane through space.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;the-dataset&quot;&gt;The Dataset&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-dataset&quot; aria-label=&quot;Anchor link for: the-dataset&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;p&gt;If we expect the neural network to classify the contents of Table 1 for us, it&#x27;s going to need some examples to work with. That&#x27;s reasonable; after all, we&#x27;re asking it to decide which parts of space require a &quot;0&quot; classification and which other parts need a &quot;1&quot; classification.&lt;&#x2F;p&gt;
+&lt;p&gt;You might well be asking: &lt;em&gt;&quot;Since we only have access to those four points, how many more examples do we even have to give up?&quot;&lt;&#x2F;em&gt; Well, because we only care about how the net classifies those four points, we can create a dataset that includes points in the general vicinity around the four XOR points. If we create a general &quot;circle&quot; of new points around each original XOR point, each with the same label as its corresponding XOR point, then the importance of &quot;proximity&quot; will be driven home for the net. It should then have no trouble classifying the &quot;center&quot; of each of those four circles of points (which are our four original XOR inputs).&lt;&#x2F;p&gt;
+&lt;p&gt;Luckily, the idea of sampling points in a general circle around one particular point is standard practice: it&#x27;s called adding &quot;Gaussian noise&quot; to the point at the center of the circle. Let each data point $\vec{x}_i \in \mathcal{D}$ be an input to the XOR function that has been dislocated by some 2-D Gaussian noise. The neural network should build a non-linear decision boundary to accurately classify the XOR points after training on the contents of these four clusters:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;parthsarkar17.github.io&#x2F;posts&#x2F;explore-nn&#x2F;dataset.png&quot; alt=&quot;alt-text&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;neural-network-architecture&quot;&gt;Neural Network Architecture&lt;a class=&quot;zola-anchor&quot; href=&quot;#neural-network-architecture&quot; aria-label=&quot;Anchor link for: neural-network-architecture&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;p&gt;So far, we&#x27;ve learned a great deal about functions. In the context of the XOR dataset we just created, we learned about how the data is not linearly separable, which makes it difficult for a computer to define a function to delineate boundaries between the two classifications.&lt;&#x2F;p&gt;
+&lt;p&gt;But we also learned that, if it exists, computers are good at finding a linear separation within a dataset. Neural networks take advantage of this; they attempt to transform the linearly-inseparable data into a higher-dimensional space where the new data &lt;em&gt;is&lt;&#x2F;em&gt; linearly separable. We can then separate it using any one of the linear classification techniques available.&lt;&#x2F;p&gt;
+&lt;p&gt;This section will hopefully illuminate how each component of the neural network supports this general goal. Here&#x27;s a diagram of the overall architecture. Refer back to this throughout the section:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;parthsarkar17.github.io&#x2F;posts&#x2F;explore-nn&#x2F;nn_diagram.png&quot; alt=&quot;alt-text&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Let $W^{(1)} \in \mathbb{R}^{3 \times 3}$ and $W^{(2)}\in \mathbb{R}^{1 \times 4}$ respectively define the first and second weight matrices. Let $x^{(1)}$ and $x^{(2)}$ respectively define the inputs to these weight matrices (for now, ignore the added 1&#x27;s to the bottom of each input). Lastly, let $z^{(i)}$ be the output of the $i$th linear transformation.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;the-hidden-layer&quot;&gt;The &quot;Hidden&quot; Layer&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-hidden-layer&quot; aria-label=&quot;Anchor link for: the-hidden-layer&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h4&gt;
+&lt;p&gt;For now, we&#x27;ll use the term &quot;hidden layer&quot; to denote $z^{(1)}$. You&#x27;ll notice that, in the architecture laid out above, $W^{(1)}$ is shaped in such a way that the input $x^{(1)}$ turns into a vector $z^{(1)}$ that lives in a higher dimension than $x^{(1)}$ itself.&lt;&#x2F;p&gt;
+&lt;p&gt;This plays into the neural network&#x27;s objective of sending the input points to a higher-dimensional space in order to linearly-classify them more easily. So, does that mean we&#x27;ve reached our goal? Is this the transformation we can use to draw a separating plane between the two sets of points?&lt;&#x2F;p&gt;
+&lt;p&gt;Well, not exactly. Although we are indeed in a higher-dimensional space, recall that the transformation from $x^{(1)}$ to $z^{(1)}$ was linear. This means that no information can be &quot;created&quot; in this transformation to properly distinguish output points by their classifications. Unfortunately, the higher-dimensional outputs still lie on a sub-space of the same dimension as the lower-dimensional inputs, so these outputs points are just as non-linearly separable as the input points that created them.&lt;&#x2F;p&gt;
+&lt;p&gt;You would then be correct to wonder, &lt;em&gt;&quot;if we&#x27;re on a sub-space of the same dimension as before, why do we want this linear transformation in the first place?&quot;&lt;&#x2F;em&gt;. The answer is: if we want to introduce some non-linearity to the data to make it linearly-separable, higher-dimensional data gives more &quot;ways&quot; (or, more accurately, &quot;dimensions&quot;) through which clusters of data points can be differentiated from one another. This is precisely what activation functions do; they create the kinds of distinctness between clusters based on their classifications that linear transformations alone cannot provide. The linear transformation to a higher-dimensional space just makes it so that these activation functions can do their jobs more easily. More on activation functions in the next section.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;parthsarkar17.github.io&#x2F;posts&#x2F;explore-nn&#x2F;3d_data.png&quot; alt=&quot;alt-text&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;the-activation-function&quot;&gt;The Activation Function&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-activation-function&quot; aria-label=&quot;Anchor link for: the-activation-function&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h4&gt;
+&lt;p&gt;The activation function plays the crucial role of introducing some non-linearity into the neural network, as described above. For now, let&#x27;s concentrate on the ReLU function, applied element-wise to $z^{(1)}$ in order to produce $x^{(1)}$ in Figure 4. Here&#x27;s what it looks like:&lt;&#x2F;p&gt;
+&lt;p&gt;$$ {ReLU}(x) =
+\begin{cases}
+x &amp;amp; \text{if } x &amp;gt; 0 \newline
+0 &amp;amp; \text{if } x \leq 0
+\end{cases}
+$$&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;parthsarkar17.github.io&#x2F;posts&#x2F;explore-nn&#x2F;relu.png&quot; alt=&quot;alt-text&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;It&#x27;s a relatively simple piece-wise function, which might be a little surprising. Can something so simple really do the trick? After all, forgetting about the angle at $x = 0$, the function looks suspiciously linear. Indeed, it turns out that that angle is precisely what we need to create a distinctness between clusters.&lt;&#x2F;p&gt;
+&lt;p&gt;Remember: the key goal of the neural network is to blow the data up into a higher-dimensional space, then distinguish the various clusters properly, then separate these transformed clusters with a linear hyperplane. When it comes to that second step, &quot;distinguishing clusters&quot;, you might have already started to see the potential of ReLU.&lt;&#x2F;p&gt;
+&lt;p&gt;Refer back to Figure 5. What if we found a way to keep the two clusters with the &quot;0&quot; classification &quot;on the ground&quot;, and then somehow &quot;raise up&quot; the two clusters with the &quot;1&quot; classification (in order to linearly-separate them well)? Again, this wouldn&#x27;t be possible with a simple linear transformation. But, if we introduce ReLU to the datapoints, it&#x27;s a different story.&lt;&#x2F;p&gt;
+&lt;p&gt;Here&#x27;s how we can leverage the angle within ReLU: if the linear transformation, in addition to increasing the dimensionality of the clusters, makes some of the new dimensions negative, then ReLU could act on these negative entries, making them 0, and thereby forcing the transformed data point to a completely new part of 3-D space.&lt;&#x2F;p&gt;
+&lt;p&gt;In other words, &lt;em&gt;we can choose our linear transformation wisely&lt;&#x2F;em&gt; in order to force clusters with classification &quot;0&quot; to have specific dimensions with negative entries, while forcing clusters of classification &quot;1&quot; to have other dimensions contain negative entries. Then, ReLU would act differently depending on which entries are negative, potentially sending these clusters to distinguishable (and linearly-separable) parts of space.&lt;&#x2F;p&gt;
+&lt;p&gt;That&#x27;s the key idea behind a neural network. Creating this distinguishable data out of an initially-indistinguishable dataset is difficult, but the linear transformation and the activation act in tandem to perform this brilliant feat. For future reference, the space created by this transformation and activation function combo is called a &quot;feature space&quot;; it sounds fancy, but the idea behind the way it&#x27;s created is simple and elegant.&lt;&#x2F;p&gt;
+&lt;p&gt;I think that&#x27;s pretty cool. Don&#x27;t you?&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;the-final-linear-classifier&quot;&gt;The Final Linear Classifier&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-final-linear-classifier&quot; aria-label=&quot;Anchor link for: the-final-linear-classifier&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h4&gt;
+&lt;p&gt;So, we&#x27;ve chosen our particular linear transformation $W^{(1)}$ to create negativity in certain dimensions and maintain non-negativity in others, depending on cluster classification. Then we&#x27;ve applied ReLU to get the linear-separability that we need. What now?&lt;&#x2F;p&gt;
+&lt;p&gt;Now, we actually create this linear decision boundary between clusters. An $n$-dimensional hyper-plane is defined with the constants $d$ and $c_1, c_2, ..., c_n$ as follows:
+$$c_1 x_1 + c_2 x_2 + ... + c_n x_n + d = 0$$&lt;&#x2F;p&gt;
+&lt;p&gt;This definition says something very important: a random point $\vec{x}$ lies on the hyperplane if and only if
+$$\begin{bmatrix}c_1 &amp;amp; c_2 &amp;amp; ... &amp;amp; c_n\end{bmatrix} \begin{bmatrix}x_1 \newline x_2 \newline \vdots \newline x_n\end{bmatrix} + d = C\vec{x} + d = 0$$&lt;&#x2F;p&gt;
+&lt;p&gt;So, if $\vec{x}$ does not lie on the plane defined by $C$ and $d$, then the value of $C\vec{x} + d$ will &lt;em&gt;not&lt;&#x2F;em&gt; be 0; it will either be a positive or negative value. In particular, points to one side of the plane will be classified as positive, and points to the other side will be classified as negative. We can leverage this fact to build our linear separator!&lt;&#x2F;p&gt;
+&lt;p&gt;For the moment, ignore the parameter &lt;em&gt;d&lt;&#x2F;em&gt;. Once again, if we wisely choose the linear transformation from our feature space to the single-dimensional output, we should classify points classified as &quot;0&quot; as negative and points classified &quot;1&quot; as positive. In other words, we&#x27;re carefully building the row matrix $C$ (and calling it $W^{(2)}$) in order to define a decision boundary for our now linearly-separable clusters.&lt;&#x2F;p&gt;
+&lt;p&gt;There&#x27;s one more piece we&#x27;ve glossed over till now: the role of the Sigmoid activation function and why it acts on the final, scalar output of the network. Here&#x27;s what the function looks like:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;parthsarkar17.github.io&#x2F;posts&#x2F;explore-nn&#x2F;sigmoid.png&quot; alt=&quot;alt-text&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;As you can see, the Sigmoid function  asymptotically approaches 0 as $x \to -\infty$, and it approaches 1 as $x \to \infty$. Also notice that $\sigma(0) = \frac{1}{2}$; so, negative inputs have output values of smaller than $\frac{1}{2}$ (close to 0) and positive inputs have output values of greater than $\frac{1}{2}$ (close to 1).&lt;&#x2F;p&gt;
+&lt;p&gt;Remember that this activation function is acting on the output of our linear classifier, which gives negative values for &quot;0&quot; classifications and positive values for &quot;1&quot; classifications. Sometimes, however, we care about just \textit{how} correct a classification is. A &quot;more negative&quot; output for a &quot;0&quot; classification is better than a negative output that is closer to 0. Applying the Sigmoid function makes this concept of &quot;more&quot; or &quot;less&quot; negativity well-defined. If we apply $\sigma$ to any negative value, an output closer to 0 would signify more decisiveness of the model (more negativity), whereas an output closer to 0.5 would signify less decisiveness (less negativity). We can say the equivalent for positive classifications and $\sigma$&#x27;s corresponding proximity to 1.
+$$f\left(\vec{x}\right) = \frac{1}{1 + e^{-W^{(2)}\vec{x}}}$$&lt;&#x2F;p&gt;
+&lt;p&gt;This final layer, displayed compactly above, is also called Logistic Regression. In a sense, it provides a kind of &quot;probability&quot; for the correctness of the output. If the model was very sure that a data-point had the classification &quot;1&quot;, it would output a value $p \approx 1$ at the end of the network, and this value would also serve as this &quot;probability of correctness&quot;. On the other hand, if the model was very sure a data-point was labeled &quot;0&quot;, it would output a positive value $p \approx 0$, and the probability of correctness would be $1- p$. It&#x27;s a handy set up that gives us real-time insight into what the algorithm is thinking on any given data-point.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;what-are-those-extra-1-s-on-every-layer&quot;&gt;What Are Those Extra &quot;1&quot;s On Every Layer?&lt;a class=&quot;zola-anchor&quot; href=&quot;#what-are-those-extra-1-s-on-every-layer&quot; aria-label=&quot;Anchor link for: what-are-those-extra-1-s-on-every-layer&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h4&gt;
+&lt;p&gt;This is the part where I admit that I lied about using linear transformations. Well, they &lt;em&gt;were&lt;&#x2F;em&gt; linear transformations, but they were linear transformations on vectors with an additional &quot;1&quot; cryptically placed on the bottom of each vector. Those &quot;1&quot;s actually mean the transformations were &lt;em&gt;affine&lt;&#x2F;em&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;These kinds of mappings are linear transformations, but with the added so-called &quot;y-intercept&quot; on the output. So, instead of our normal $\vec{y} = A\vec{x}$, we&#x27;d get something like $\vec{y} = A\vec{x} + \vec{b}$. Here&#x27;s a quick proof that adding the &quot;1&quot; on the bottom of $\vec{x}$ does the same thing as adding this y-intercept component, if you accordingly change $A$:&lt;&#x2F;p&gt;
+&lt;p&gt;$$
+\begin{align*}
+A\vec{x} + \vec{b}
+&amp;amp;=
+\begin{bmatrix}
+a_{11} &amp;amp; a_{12} &amp;amp; ... &amp;amp; a_{1n} \newline
+a_{21} &amp;amp; a_{22} &amp;amp; ... &amp;amp; a_{2n} \newline
+\vdots &amp;amp; \vdots &amp;amp; \ddots &amp;amp; \vdots \newline
+a_{m1} &amp;amp; a_{m2} &amp;amp; ... &amp;amp; a_{mn}
+\end{bmatrix}
+\begin{bmatrix}
+x_1 \newline x_2 \newline \vdots \newline x_n
+\end{bmatrix} +
+\begin{bmatrix}
+b_1 \newline b_2 \newline \vdots \newline b_m
+\end{bmatrix} \newline
+&amp;amp; =
+\begin{bmatrix}
+a_{11}\cdot x_1 + a_{12}\cdot x_2 + ... + a_{1n}\cdot x_n \newline
+a_{21}\cdot x_1 + a_{22}\cdot x_2 + ... + a_{2n}\cdot x_n \newline
+\vdots \newline
+a_{m1}\cdot x_1 + a_{m2}\cdot x_2 + ... + a_{mn}\cdot x_n
+\end{bmatrix} +
+\begin{bmatrix}
+b_1 \newline b_2 \newline \vdots \newline b_m
+\end{bmatrix} \newline
+&amp;amp;=
+\begin{bmatrix}
+a_{11}\cdot x_1 + a_{12}\cdot x_2 + ... + a_{1n}\cdot x_n + b_1 \cdot 1\newline
+a_{21}\cdot x_1 + a_{22}\cdot x_2 + ... + a_{2n}\cdot x_n + b_2 \cdot 1\newline
+\vdots \newline
+a_{m1}\cdot x_1 + a_{m2}\cdot x_2 + ... + a_{mn}\cdot x_n + b_m \cdot 1
+\end{bmatrix} \newline
+&amp;amp;=
+\begin{bmatrix}
+a_{11} &amp;amp; a_{12} &amp;amp; ... &amp;amp; a_{1n} &amp;amp; b_1 \newline
+a_{21} &amp;amp; a_{22} &amp;amp; ... &amp;amp; a_{2n} &amp;amp; b_2\newline
+\vdots &amp;amp; \vdots &amp;amp; \ddots &amp;amp; \vdots &amp;amp; \vdots \newline
+a_{m1} &amp;amp; a_{m2} &amp;amp; ... &amp;amp; a_{mn} &amp;amp; b_m
+\end{bmatrix}
+\begin{bmatrix}
+x_1 \newline x_2 \newline \vdots \newline x_n \newline 1
+\end{bmatrix}
+= A&#x27;\vec{x}&#x27;
+\end{align*}
+$$
+Where $A&#x27;$ is the same as $A$ with an additional column $\vec{b}$, and $\vec{x}&#x27;$ is $x$ with an additional $1$ on its lowest entry. The ability to express $A\vec{x}+\vec{b}$ as a linear transformation of a higher-dimensional vector $\vec{x}&#x27;$ is why I&#x27;ve freely been using the term &quot;linear transformation&quot; in previous sections. The column $\vec{b}$ is part of what&#x27;s &quot;chosen wisely&quot; in each linear transformation.&lt;&#x2F;p&gt;
+&lt;p&gt;But why do we even need affine transformations instead of simple linear ones? When projecting data to a higher-dimensional space for future linear separation, it&#x27;s always helpful to have an extra degree of freedom to help map input data to a more useful part of space. In addition, when building the plane that actually separates the data, odds are, the best separating plane doesn&#x27;t go through the origin. Hence, a linear transformation is not ideal, and we have to add in the extra &quot;&lt;em&gt;d&lt;&#x2F;em&gt;&quot; term that we ignored earlier.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;conclusions-on-the-architecture&quot;&gt;Conclusions on the Architecture&lt;a class=&quot;zola-anchor&quot; href=&quot;#conclusions-on-the-architecture&quot; aria-label=&quot;Anchor link for: conclusions-on-the-architecture&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h4&gt;
+&lt;p&gt;Those four components, the hidden layer, the activation function, the linear classifier, and the intercept, just about sum up the key structure of our neural net. They each have a piece to play in the abstract goal of the network: to raise the dimensionality of the data, to construct linear separability in the data, and to finally separate the data with respect to their classifications.&lt;&#x2F;p&gt;
+&lt;p&gt;The crux of this model so far was our choice of linear transformations. A well-chosen $W^{(1)}$ and $W^{(2)}$ would define the set of rules we need to classify the XOR problem correctly; on the other hand, any poorly-chosen transformations would yield very frightening and incorrect results. So, then, how do we choose our transformations wisely? Well, the goal isn&#x27;t for us to choose them at all; we&#x27;ll leave that up to the computer to decide for itself, through a process called &quot;training&quot;.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;training-the-neural-network&quot;&gt;Training the Neural Network&lt;a class=&quot;zola-anchor&quot; href=&quot;#training-the-neural-network&quot; aria-label=&quot;Anchor link for: training-the-neural-network&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;p&gt;So far, we&#x27;ve laid out the ideas behind why the neural network &lt;em&gt;f&lt;&#x2F;em&gt; has its particular structure. Now, we&#x27;ll dive into how this structure is leveraged to create an approximation of the function that we want to emulate. During this process, called &quot;training&quot;, the neural network looks at a data point $\vec{x}$, outputs an approximation for its label $f(\vec{x})$, determines how good its approximation was by some metric, and updates its weights in a way that will provide a better approximation for subsequent data points.&lt;&#x2F;p&gt;
+&lt;p&gt;The process of getting an approximation for a data point is called &quot;forward propagation&quot;. As the name suggests, the neural network takes in a data point $\vec{x}$, feeds it through its weight layers and activation functions, and finally outputs an approximation $f(\vec{x})$. Then, we get a &quot;cost&quot; for the approximation, which considers how close $f(\vec{x})$ is to our true label $y$. Finally, the network goes through a process called &quot;backwards propagation&quot;, in which the network modifies its own weights to get better approximations in the future.&lt;&#x2F;p&gt;
+&lt;p&gt;In non-toy neural networks, these processes is almost never done on just a single data point; it&#x27;s usually more efficient to compute approximations of many data points, get an average of how good they are, and update the weights (with respect to this average score) only once (a process called &lt;em&gt;batching&lt;&#x2F;em&gt;). Luckily, we&#x27;re using a baby network; for our purposes, we&#x27;ll consider only one data point at a time when computing our approximations and how to make them better.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;forward-propagation&quot;&gt;Forward Propagation&lt;a class=&quot;zola-anchor&quot; href=&quot;#forward-propagation&quot; aria-label=&quot;Anchor link for: forward-propagation&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;p&gt;In the process of training, we don&#x27;t care so much about what our approximations actually are. We only care about them in the context of what their corresponding cost function values are. Here&#x27;s what our cost function looks like for one data point:
+$$\mathcal{L}(f, \vec{x}, y) = \left(y - f(\vec{x})\right)^{2}$$&lt;&#x2F;p&gt;
+&lt;p&gt;As you can see, this (non-negative) function outputs a very small value when the approximation $f(x)$ is close to the true label $y$. On the other hand, it outputs a large number when $f(\vec{x})$ and $y$ are not very close together. Because we want approximations that are closer to the true label, for every data point, we want the value $\mathcal{L}(f, \vec{x}, y)$ to be as small as possible.$$&lt;&#x2F;p&gt;
+&lt;p&gt;Now, let&#x27;s do forward propagation for one data point. If we have a $(\vec{x}, y)$ data point - label pair, we can consolidate the process of getting the approximation and the cost for the approximation as follows:&lt;&#x2F;p&gt;
+&lt;p&gt;$$ \begin{equation}
+\tilde{y} = f(x) =
+\sigma\left(W^{(2)} \cdot R\left(\begin{bmatrix} W^{(1)} \cdot \vec{x} \newline 1\end{bmatrix}\right)\right)
+\end{equation} $$&lt;&#x2F;p&gt;
+&lt;p&gt;$$
+\begin{equation}
+\mathcal{L}\left(y, \tilde{y}\right) = \left(y - \tilde{y}\right)^{2}
+\end{equation} $$&lt;&#x2F;p&gt;
+&lt;p&gt;Equation (2) might look scary, but it&#x27;s exactly what we&#x27;ve been discussing this whole time (visualized in Figure 4). Here&#x27;s a step-by-step breakdown of this forward propagation process:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;We first multiply our input $\vec{x}$ by our first linear transformation $W^{(1)}$, which is what we see in the top-right corner of the equation (3.2.1). You can also see the addition of the `1&#x27; in the final entry of the vector, intended to absorb our y-intercept for the first transformation layer (3.2.4). Let&#x27;s call this new vector (with $W^{(1)}\vec{x}$ in the first entries and &quot;1&quot; in the last entry): &quot;$\vec{z}_1$&quot;, as shown in Figure 4.&lt;&#x2F;li&gt;
+&lt;li&gt;Next, we wrap $\vec{z}_1$ with the ReLU activation function, denoted as $R$ for simplicity (3.2.2). Let&#x27;s call $\vec{z}_1$ after it has been transformed by $R$: &quot;$\vec{x}_2$&quot;.&lt;&#x2F;li&gt;
+&lt;li&gt;We then multiply $\vec{x}_2$ with our second weight matrix $W^{(2)}$, to get a scalar quantity $z_2$. We then pass this value through the sigmoid function to get our approximation $f\left(\vec{x}\right) = \tilde{y}$.&lt;&#x2F;li&gt;
+&lt;li&gt;Finally, from equation (3), we get a metric $\mathcal{L}(y, \tilde{y})$ of how good the approximation $\tilde{y}$ is with respect to our desired label, $y$.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h3 id=&quot;backwards-propagation&quot;&gt;Backwards Propagation&lt;a class=&quot;zola-anchor&quot; href=&quot;#backwards-propagation&quot; aria-label=&quot;Anchor link for: backwards-propagation&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;p&gt;If you&#x27;ll remember from 2.4.3, given a function $f: \mathbb{R}^n \to \mathbb{R}$, starting from the point $\vec{x}$, we need to travel some tiny distance in the (greatest-descent) direction of $-\frac{df}{d\vec{x}}$ in order to find a new spot $\vec{x}&#x27;$ that has a smaller value on $f$ than the original spot $\vec{x}$.&lt;&#x2F;p&gt;
+&lt;p&gt;Now, you might notice two things:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;For every approximation and true label, we want our cost $\mathcal{L}(y, \tilde{y})$ to be as small as possible.&lt;&#x2F;li&gt;
+&lt;li&gt;For a single data point $\vec{x}$ with a label $y$, our approximation $\tilde{y}$ depends on the weights we choose, $W^{(1)}$ and  $W^{(2)}$.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;Keeping those two things in mind, we can build up the idea behind back propagation. Focus on a single data point, and let our weights start out at some initial $W^{(1)}, W^{(2)}$. If we tweak $W^{(1)}, W^{(2)}$ in some small way, our approximation $\tilde{y}$ will change, and so will our cost $\mathcal{L}(y, \tilde{y})$. &lt;em&gt;We want to change our weights in the direction that decreases the cost as quickly as possible. Does that sound familiar?&lt;&#x2F;em&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;In this case, we fix our input $\vec{x}$, and treat our weights $W^{(1)}, W^{(2)}$ as variables that we can change in order to decrease the cost of the approximation they provide. To be clear, the goal is to find $\frac{d\mathcal{L}}{d W^{(1)}}$ and $\frac{d\mathcal{L}}{d W^{(2)}}$ so we can update the weights in the opposite direction.&lt;&#x2F;p&gt;
+&lt;p&gt;It might sound complicated to find the best &quot;direction&quot; in which to update our weights, as there seem to be a lot of moving parts. We&#x27;ll take it step-by-step, with a little help from our friend, the Chain Rule. Here&#x27;s a recap of notation:&lt;&#x2F;p&gt;
+&lt;p&gt;$$
+\begin{equation*}
+\tilde{y} = f(x) =
+\sigma\left(W^{(2)} \cdot R\left(\begin{bmatrix} W^{(1)} \cdot \vec{x} \newline 1\end{bmatrix}\right)\right)
+\end{equation*} $$&lt;&#x2F;p&gt;
+&lt;p&gt;$$
+\vec{z}_1 = \begin{bmatrix}W^{(1)} \vec{x} \newline 1\end{bmatrix} \newline
+\vec{x}_2 = R\left(\vec{z}_1\right) \newline
+\vec{z}_2 = W^{(2)}\vec{x}_2 \newline
+\tilde{y} = \sigma \left(\vec{z}_2\right) \newline
+\mathcal{L}(y, \tilde{y}) = \left(y - \tilde{y}\right)^{2}
+$$
+We&#x27;ll break down $\frac{d\mathcal{L}}{d W^{(1)}}$ and $\frac{d\mathcal{L}}{d W^{(2)}}$ in the next two sections.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;update-of-second-weight-layer&quot;&gt;Update of Second Weight Layer&lt;a class=&quot;zola-anchor&quot; href=&quot;#update-of-second-weight-layer&quot; aria-label=&quot;Anchor link for: update-of-second-weight-layer&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h4&gt;
+&lt;p&gt;Let&#x27;s apply the chain rule to update the second weight layer first, since it&#x27;s &quot;closer&quot; to the output of the function than the first weight layer. Here&#x27;s what the chain rule says:&lt;&#x2F;p&gt;
+&lt;p&gt;$$\frac{d\mathcal{L}}{d W^{(2)}} = \frac{d\mathcal{L}}{d \tilde{y}} \cdot \frac{d\tilde{y}}{d\vec{z}_2} \cdot \frac{d\vec{z}_2}{d W^{(2)}}$$&lt;&#x2F;p&gt;
+&lt;p&gt;We&#x27;ll find each of these three terms separately, then find their product to get a result for $\frac{d\mathcal{L}}{d W^{(2)}}$.
+$$
+\begin{align*}
+&amp;amp; \frac{d\mathcal{L}}{d \tilde{y}} = \frac{d}{d \tilde{y}} \left[(\tilde{y} - y)^2\right] = 2 \cdot(\tilde{y} - y) \newline
+&amp;amp; \frac{d\tilde{y}}{d\vec{z}_2} = \frac{d}{d\vec{z}_2}\left[\sigma(\vec{z}_2)\right] = \sigma&#x27;(\vec{z}_2) \newline
+&amp;amp;\frac{d\vec{z}_2}{d W^{(2)}} = \frac{d}{d W^{(2)}} \left[W^{(2)}\vec{x}_2\right] = \vec{x}_2^{T}
+\end{align*}
+$$
+Putting them together,
+$$\frac{d\mathcal{L}}{d W^{(2)}} = 2(\tilde{y} - y) \cdot \sigma&#x27;(\vec{z}_2) \cdot \vec{x}_2^{T}$$
+Finally, to take a step in the opposite direction of $\frac{d\mathcal{L}}{d W^{(2)}}$, we update $W^{(2)}$ with the following rule:
+$$W^{(2)} \xleftarrow{} W^{(2)} - \alpha \frac{d\mathcal{L}}{d W^{(2)}}$$
+where $\alpha$ is a small, positive, &quot;learning rate&quot; parameter that defines how big you want your step in the direction $- \frac{d\mathcal{L}}{d W^{(2)}}$ to be.&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;update-of-first-weight-layer&quot;&gt;Update of First Weight Layer&lt;a class=&quot;zola-anchor&quot; href=&quot;#update-of-first-weight-layer&quot; aria-label=&quot;Anchor link for: update-of-first-weight-layer&quot; style=&quot;visibility: hidden;&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h4&gt;
+&lt;p&gt;The update rule of $W^{(1)}$ is slightly more involved. Not only is it &quot;further back&quot; in the network, unlike $W^{(2)}$ (which is a row vector), $W^{(1)}$ is a 3-by-3 matrix. First, here&#x27;s what the chain rule says about finding $\frac{d\mathcal{L}}{d W^{(1)}}$:&lt;&#x2F;p&gt;
+&lt;p&gt;$$\frac{d\mathcal{L}}{d W^{(1)}} = \frac{d\mathcal{L}}{d \tilde{y}} \cdot \frac{d\tilde{y}}{d\vec{z}_2} \cdot \frac{d\vec{z}_2}{d \vec{x}_2} \cdot \frac{d\vec{x}_2}{d\vec{z}_1}\cdot \frac{d\vec{z}_1}{d W^{(1)}}$$&lt;&#x2F;p&gt;
+&lt;p&gt;Once again, let&#x27;s calculate each of these components, so we can find their product.&lt;&#x2F;p&gt;
+&lt;p&gt;$$\frac{d\mathcal{L}}{d \tilde{y}} = \frac{d}{d \tilde{y}} \left[(\tilde{y} - y)^2\right] = 2 \cdot(\tilde{y} - y) \newline \newline
+\frac{d\tilde{y}}{d\vec{z}_2} = \frac{d}{d\vec{z}_2}\left[\sigma(\vec{z}_2)\right] = \sigma&#x27;(\vec{z}_2) \newline$$
+$$ \frac{d\vec{z}_2}{d \vec{x}_2} = \frac{d}{d \vec{x}_2} \left[{W^{(2)}\vec{x}_2}\right] = W^{(2)} $$&lt;&#x2F;p&gt;
+&lt;p&gt;Those gradients were relatively straightforward to compute. This next one also isn&#x27;t so bad, but let&#x27;s walk through it. Remember that $\vec{x}_2 = R\left(\vec{z}_1\right)$, so we&#x27;re essentially applying the ReLU activation function to each element of vector $\vec{z}_1$.&lt;&#x2F;p&gt;
+&lt;p&gt;From 2.2.4, in the same way we found the gradient $\frac{dh}{d\vec{x}}$ for our vector-valued function $h: \mathbb{R}^{n} \to \mathbb{R}^n$ that applies a function $\gamma: \mathbb{R} \to \mathbb{R}$ element-wise to a vector input $\vec{x}$, we know:
+$$\frac{d\vec{x}_{1}}{d\vec{z}_1} = \begin{bmatrix} R&#x27;(\vec{z}_1(1)) &amp;amp; {0} &amp;amp; {0} &amp;amp; {0} \newline
+0 &amp;amp; R&#x27;(\vec{z}_1(2)) &amp;amp; 0 &amp;amp; 0 \newline
+0 &amp;amp; 0 &amp;amp; R&#x27;(\vec{z}_1(3)) &amp;amp; 0 \newline
+0 &amp;amp; 0 &amp;amp; 0 &amp;amp; R&#x27;(\vec{z}_1(4)) \newline \end{bmatrix}$$&lt;&#x2F;p&gt;
+&lt;p&gt;where $\vec{z}_{1}(i)$ is the $i$ th element of the vector $\vec{z}_1$.&lt;&#x2F;p&gt;
+&lt;p&gt;Finally, we&#x27;re down to the last term: $\frac{d\vec{z}_1}{d W^{(1)}}$. Now, we truly encounter the problem of $W^{(1)}$ being a 3-by-3 matrix. We know that $\vec{z}_1 = \begin{bmatrix}W^{(1)} \vec{x} \ 1\end{bmatrix}$, but we&#x27;ve only ever done the derivative of a function with respect to a vector; what does it mean to take a derivative of a function with respect to a matrix?&lt;&#x2F;p&gt;
+&lt;p&gt;I&#x27;m not qualified to answer that question, so I decided to do something a little nifty. Let&#x27;s bring the problem back into my abilities; what if we found a way to think of the matrix $W^{(1)}$ as a vector?&lt;&#x2F;p&gt;
+&lt;p&gt;We know that $W^{(1)} \vec{x}$ is a vector, whose $i$th row is the dot-product of $\vec{x}$ with row $i$ of $W^{(1)}$. Because I said so, and because I&#x27;m the one writing this, let&#x27;s take each row of $W^{(1)}$, make them columns, and stack them on top of each other. That makes $W^{(1)}$ into a vector $\vec{w}_1$. In order to get the right result for $W^{(1)} \vec{x}$, we make the vector $\vec{x}$ into a \textit{matrix} $X$, and have it act on our new $\vec{w}_1$. Here&#x27;s what I mean:&lt;&#x2F;p&gt;
+&lt;p&gt;$$W^{(1)} \vec{x} =
+\begin{bmatrix} W^{(1)}&lt;em&gt;{1, 1} &amp;amp;  W^{(1)}&lt;&#x2F;em&gt;{1, 2} &amp;amp; W^{(1)}&lt;em&gt;{1, 3} \ W^{(1)}&lt;&#x2F;em&gt;{2, 1} &amp;amp;  W^{(1)}&lt;em&gt;{2, 2} &amp;amp; W^{(1)}&lt;&#x2F;em&gt;{2, 3} \
+W^{(1)}&lt;em&gt;{3, 1} &amp;amp;  W^{(1)}&lt;&#x2F;em&gt;{3, 2} &amp;amp; W^{(1)}&lt;em&gt;{3, 3}
+\end{bmatrix}
+\begin{bmatrix}
+\vec{x}&lt;&#x2F;em&gt;{1,1} \ \vec{x}&lt;em&gt;{1,2} \ \vec{x}&lt;&#x2F;em&gt;{1,3}
+\end{bmatrix}$$
+$$ = \begin{bmatrix}
+\vec{x}&lt;em&gt;{1,1} &amp;amp; \vec{x}&lt;&#x2F;em&gt;{1,2} &amp;amp; \vec{x}&lt;em&gt;{1,3} &amp;amp; 0 &amp;amp; 0 &amp;amp; 0 &amp;amp; 0 &amp;amp; 0 &amp;amp; 0\
+0 &amp;amp; 0 &amp;amp; 0 &amp;amp; \vec{x}&lt;&#x2F;em&gt;{1,1} &amp;amp; \vec{x}&lt;em&gt;{1,2} &amp;amp; \vec{x}&lt;&#x2F;em&gt;{1,3}&amp;amp; 0 &amp;amp; 0 &amp;amp; 0 \
+0 &amp;amp; 0 &amp;amp; 0 &amp;amp; 0 &amp;amp; 0 &amp;amp; 0 &amp;amp; \vec{x}&lt;em&gt;{1,1} &amp;amp; \vec{x}&lt;&#x2F;em&gt;{1,2} &amp;amp; \vec{x}&lt;em&gt;{1,3}
+\end{bmatrix}
+\begin{bmatrix} W^{(1)}&lt;&#x2F;em&gt;{1, 1} \  W^{(1)}&lt;em&gt;{1, 2} \ W^{(1)}&lt;&#x2F;em&gt;{1, 3} \ \vdots
+\ W^{(1)}&lt;em&gt;{3, 1}\ W^{(1)}&lt;&#x2F;em&gt;{3, 2} \ W^{(1)}_{3, 3}
+\end{bmatrix} = X \vec{w}_1 $$&lt;&#x2F;p&gt;
+&lt;p&gt;Now, we can re-form our function to say: $\vec{z}_1 = \begin{bmatrix}X \vec{w}_1 \ 1\end{bmatrix}$. Let&#x27;s use an intermediary variable $\vec{q} = X \vec{w}_1$, and let&#x27;s find $\frac{d\vec{z}_1}{d\vec{w}_1}$. \&lt;&#x2F;p&gt;
+&lt;p&gt;By the Jacobian rule, we know: $$\frac{d \vec{z}_1}{d \vec{q}} = \begin{bmatrix} 1 &amp;amp; 0 &amp;amp; 0 \newline 0 &amp;amp; 1 &amp;amp; 0 \newline 0 &amp;amp; 0 &amp;amp; 1 \newline 0 &amp;amp; 0 &amp;amp; 0\end{bmatrix}$$&lt;&#x2F;p&gt;
+&lt;p&gt;By our common gradients, we know: $$\frac{d \vec{q}}{d \vec{w}_1} = X$$ Putting them together, we know:
+$\frac{d \vec{z}_1}{d \vec{w}_1} = \begin{bmatrix} 1 &amp;amp; 0 &amp;amp; 0 \newline 0 &amp;amp; 1 &amp;amp; 0 \newline 0 &amp;amp; 0 &amp;amp; 1 \newline 0 &amp;amp; 0 &amp;amp; 0\end{bmatrix} X$.&lt;&#x2F;p&gt;
+&lt;p&gt;And that&#x27;s it! We computed all five of the derivatives we need to find $\frac{d \mathcal{L}}{d W^{(1)}}$. Putting it all together, we find:&lt;&#x2F;p&gt;
+&lt;p&gt;$$\frac{d\mathcal{L}}{d \vec{w}_1} = \frac{d\mathcal{L}}{d \tilde{y}} \cdot \frac{d\tilde{y}}{d\vec{z}_2} \cdot \frac{d\vec{z}_2}{d \vec{x}_2} \cdot \frac{d\vec{x}_2}{d\vec{z}_1}\cdot \frac{d\vec{z}_1}{d \vec{w}_1} = $$&lt;&#x2F;p&gt;
+&lt;p&gt;$$2 (\tilde{y} - y) \cdot \sigma&#x27;(\vec{z}&lt;em&gt;2) \cdot W^{(2)} \cdot \begin{bmatrix}R&#x27;(\vec{z}&lt;&#x2F;em&gt;{1, 1}) &amp;amp; 0 &amp;amp; 0 &amp;amp; 0 \newline
+0 &amp;amp; R&#x27;(\vec{z}&lt;em&gt;{1, 2}) &amp;amp; 0 &amp;amp; 0 \newline
+0 &amp;amp; 0 &amp;amp; R&#x27;(\vec{z}&lt;&#x2F;em&gt;{1, 3}) &amp;amp; 0 \newlnie
+0 &amp;amp; 0 &amp;amp; 0 &amp;amp; R&#x27;(\vec{z}&lt;em&gt;{1, 4})
+\end{bmatrix}\cdot \begin{bmatrix} 1 &amp;amp; 0 &amp;amp; 0 \newline 0 &amp;amp; 1 &amp;amp; 0 \newline 0 &amp;amp; 0 &amp;amp; 1 \newline 0 &amp;amp; 0 &amp;amp; 0\end{bmatrix} X $$
+$$ = 2 (\tilde{y} - y) \cdot \sigma&#x27;(\vec{z}&lt;em&gt;2) \cdot W^{(2)} \cdot \begin{bmatrix}R&#x27;(\vec{z}&lt;&#x2F;em&gt;{1, 1}) &amp;amp; 0 &amp;amp; 0 \newline
+0 &amp;amp; R&#x27;(\vec{z}&lt;&#x2F;em&gt;{1, 2}) &amp;amp; 0  \newline
+0 &amp;amp; 0 &amp;amp; R&#x27;(\vec{z}_{1, 3})  \newline
+0 &amp;amp; 0 &amp;amp; 0
+\end{bmatrix}\cdot X $$&lt;&#x2F;p&gt;
+&lt;p&gt;Computing $\frac{\mathcal{L}}{d W^{(1)}}$ from $\frac{d\mathcal{L}}{d \vec{w}_1}$ is easy. The result we get above is $\frac{d\mathcal{L}}{d \vec{w}_1}$, which is a row vector. To make this back into a matrix, take the first three terms as the first row, the second three terms as the second row, and the final three terms as the final row. Again, update with the rule:&lt;&#x2F;p&gt;
+&lt;p&gt;$$W^{(1)} \xleftarrow{} W^{(1)} - \alpha \frac{d\mathcal{L}}{d W^{(1)}}$$&lt;&#x2F;p&gt;
+</content>
+	</entry>
+</feed>
