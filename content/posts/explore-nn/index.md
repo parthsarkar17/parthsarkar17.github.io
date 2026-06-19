@@ -388,7 +388,7 @@ In non-toy neural networks, these processes is almost never done on just a singl
 In the process of training, we don't care so much about what our approximations actually are. We only care about them in the context of what their corresponding cost function values are. Here's what our cost function looks like for one data point: 
 $$\mathcal{L}(f, \vec{x}, y) = \left(y - f(\vec{x})\right)^{2}$$
 
-As you can see, this (non-negative) function outputs a very small value when the approximation $f(x)$ is close to the true label $y$. On the other hand, it outputs a large number when $f(\vec{x})$ and $y$ are not very close together. Because we want approximations that are closer to the true label, for every data point, we want the value $\mathcal{L}(f, \vec{x}, y)$ to be as small as possible.$$
+As you can see, this (non-negative) function outputs a very small value when the approximation $f(x)$ is close to the true label $y$. On the other hand, it outputs a large number when $f(\vec{x})$ and $y$ are not very close together. Because we want approximations that are closer to the true label, for every data point, we want the value $\mathcal{L}(f, \vec{x}, y)$ to be as small as possible.
 
 Now, let's do forward propagation for one data point. If we have a $(\vec{x}, y)$ data point - label pair, we can consolidate the process of getting the approximation and the cost for the approximation as follows:
 
@@ -488,6 +488,7 @@ I'm not qualified to answer that question, so I decided to do something a little
 
 We know that $W^{(1)} \vec{x}$ is a vector, whose $i$th row is the dot-product of $\vec{x}$ with row $i$ of $W^{(1)}$. Because I said so, and because I'm the one writing this, let's take each row of $W^{(1)}$, make them columns, and stack them on top of each other. That makes $W^{(1)}$ into a vector $\vec{w}_1$. In order to get the right result for $W^{(1)} \vec{x}$, we make the vector $\vec{x}$ into a _matrix_ $X$, and have it act on our new $\vec{w}_1$. Here's what I mean:
 
+<div>
 $$
 W^{(1)} \vec{x} = 
 \begin{bmatrix} W^{(1)}_{1, 1} &  W^{(1)}_{1, 2} & W^{(1)}_{1, 3} \newline W^{(1)}_{2, 1} &  W^{(1)}_{2, 2} & W^{(1)}_{2, 3} \newline
@@ -505,6 +506,7 @@ W^{(1)}_{3, 1} &  W^{(1)}_{3, 2} & W^{(1)}_{3, 3}
  \newline W^{(1)}_{3, 1} \newline W^{(1)}_{3, 2} \newline W^{(1)}_{3, 3}
 \end{bmatrix} = X \vec{w}_1
 $$
+<div>
 
 
 Now, we can re-form our function to say: $\vec{z}_1 = \begin{bmatrix}X \vec{w}_1  1\end{bmatrix}$. Let's use an intermediary variable $\vec{q} = X \vec{w}_1$, and let's find $\frac{d\vec{z}_1}{d\vec{w}_1}$.
@@ -516,13 +518,14 @@ $\frac{d \vec{z}_1}{d \vec{w}_1} = \begin{bmatrix} 1 & 0 & 0 \newline 0 & 1 & 0 
 
 And that's it! We computed all five of the derivatives we need to find $\frac{d \mathcal{L}}{d W^{(1)}}$. Putting it all together, we find:
 
-$$\frac{d\mathcal{L}}{d \vec{w}_1} = \frac{d\mathcal{L}}{d \tilde{y}} \cdot \frac{d\tilde{y}}{d\vec{z}_2} \cdot \frac{d\vec{z}_2}{d \vec{x}_2} \cdot \frac{d\vec{x}_2}{d\vec{z}_1}\cdot \frac{d\vec{z}_1}{d \vec{w}_1} \newline
-
+$$
+\frac{d\mathcal{L}}{d \vec{w}_1} = \frac{d\mathcal{L}}{d \tilde{y}} \cdot \frac{d\tilde{y}}{d\vec{z}_2} \cdot \frac{d\vec{z}_2}{d \vec{x}_2} \cdot \frac{d\vec{x}_2}{d\vec{z}_1}\cdot \frac{d\vec{z}_1}{d \vec{w}_1} \newline
 = 2 (\tilde{y} - y) \cdot \sigma'(\vec{z}_2) \cdot W^{(2)} \cdot \begin{bmatrix}R'(\vec{z}_{1, 1}) & 0 & 0 & 0 \newline
 0 & R'(\vec{z}_{1, 2}) & 0 & 0 \newline
 0 & 0 & R'(\vec{z}_{1, 3}) & 0 \newline
 0 & 0 & 0 & R'(\vec{z}_{1, 4})
-\end{bmatrix}\cdot \begin{bmatrix} 1 & 0 & 0 \newline 0 & 1 & 0 \newline 0 & 0 & 1 \newline 0 & 0 & 0\end{bmatrix} X $$
+\end{bmatrix}\cdot \begin{bmatrix} 1 & 0 & 0 \newline 0 & 1 & 0 \newline 0 & 0 & 1 \newline 0 & 0 & 0\end{bmatrix} X
+$$
 
 $$ = 2 (\tilde{y} - y) \cdot \sigma'(\vec{z}_2) \cdot W^{(2)} \cdot \begin{bmatrix}R'(\vec{z}_{1, 1}) & 0 & 0 \newline
 0 & R'(\vec{z}_{1, 2}) & 0  \newline
