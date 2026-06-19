@@ -506,10 +506,10 @@ W^{(1)}_{3, 1} &  W^{(1)}_{3, 2} & W^{(1)}_{3, 3}
  \newline W^{(1)}_{3, 1} \newline W^{(1)}_{3, 2} \newline W^{(1)}_{3, 3}
 \end{bmatrix} = X \vec{w}_1
 $$
-<div>
+</div>
 
 
-Now, we can re-form our function to say: $\vec{z}_1 = \begin{bmatrix}X \vec{w}_1  1\end{bmatrix}$. Let's use an intermediary variable $\vec{q} = X \vec{w}_1$, and let's find $\frac{d\vec{z}_1}{d\vec{w}_1}$.
+BruhNow, we can re-form our function to say: $\vec{z}_1 = \begin{bmatrix}X \vec{w}_1 \newline 1\end{bmatrix}$. Let's use an intermediary variable $\vec{q} = X \vec{w}_1$, and let's find $\frac{d\vec{z}_1}{d\vec{w}_1}$.
 
 By the Jacobian rule, we know: $$\frac{d \vec{z}_1}{d \vec{q}} = \begin{bmatrix} 1 & 0 & 0 \newline 0 & 1 & 0 \newline 0 & 0 & 1 \newline 0 & 0 & 0\end{bmatrix}$$
 
