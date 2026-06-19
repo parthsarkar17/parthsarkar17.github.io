@@ -488,21 +488,21 @@ I'm not qualified to answer that question, so I decided to do something a little
 
 We know that $W^{(1)} \vec{x}$ is a vector, whose $i$th row is the dot-product of $\vec{x}$ with row $i$ of $W^{(1)}$. Because I said so, and because I'm the one writing this, let's take each row of $W^{(1)}$, make them columns, and stack them on top of each other. That makes $W^{(1)}$ into a vector $\vec{w}_1$. In order to get the right result for $W^{(1)} \vec{x}$, we make the vector $\vec{x}$ into a _matrix_ $X$, and have it act on our new $\vec{w}_1$. Here's what I mean:
 
-$$W^{(1)} \vec{x} = 
+$$ W^{(1)} \vec{x} = 
 \begin{bmatrix} W^{(1)}_{1, 1} &  W^{(1)}_{1, 2} & W^{(1)}_{1, 3} \\ W^{(1)}_{2, 1} &  W^{(1)}_{2, 2} & W^{(1)}_{2, 3} \\
 W^{(1)}_{3, 1} &  W^{(1)}_{3, 2} & W^{(1)}_{3, 3}
 \end{bmatrix}
 \begin{bmatrix}
 \vec{x}_{1,1} \\ \vec{x}_{1,2} \\ \vec{x}_{1,3}
-\end{bmatrix}$$ 
-$$ = \begin{bmatrix}
+\end{bmatrix}
+ = \begin{bmatrix}
 \vec{x}_{1,1} & \vec{x}_{1,2} & \vec{x}_{1,3} & 0 & 0 & 0 & 0 & 0 & 0\\
   0 & 0 & 0 & \vec{x}_{1,1} & \vec{x}_{1,2} & \vec{x}_{1,3}& 0 & 0 & 0 \\
   0 & 0 & 0 & 0 & 0 & 0 & \vec{x}_{1,1} & \vec{x}_{1,2} & \vec{x}_{1,3}
 \end{bmatrix}
 \begin{bmatrix} W^{(1)}_{1, 1} \\  W^{(1)}_{1, 2} \\ W^{(1)}_{1, 3} \\ \vdots 
  \\ W^{(1)}_{3, 1}\\ W^{(1)}_{3, 2} \\ W^{(1)}_{3, 3}
-\end{bmatrix} = X \vec{w}_1 $$
+\end{bmatrix} = X \vec{w}_1$$
 
 Now, we can re-form our function to say: $\vec{z}_1 = \begin{bmatrix}X \vec{w}_1 \\ 1\end{bmatrix}$. Let's use an intermediary variable $\vec{q} = X \vec{w}_1$, and let's find $\frac{d\vec{z}_1}{d\vec{w}_1}$.
 
@@ -520,6 +520,7 @@ $$2 (\tilde{y} - y) \cdot \sigma'(\vec{z}_2) \cdot W^{(2)} \cdot \begin{bmatrix}
 0 & 0 & R'(\vec{z}_{1, 3}) & 0 \newline
 0 & 0 & 0 & R'(\vec{z}_{1, 4})
 \end{bmatrix}\cdot \begin{bmatrix} 1 & 0 & 0 \newline 0 & 1 & 0 \newline 0 & 0 & 1 \newline 0 & 0 & 0\end{bmatrix} X $$
+
 $$ = 2 (\tilde{y} - y) \cdot \sigma'(\vec{z}_2) \cdot W^{(2)} \cdot \begin{bmatrix}R'(\vec{z}_{1, 1}) & 0 & 0 \newline
 0 & R'(\vec{z}_{1, 2}) & 0  \newline
 0 & 0 & R'(\vec{z}_{1, 3})  \newline
