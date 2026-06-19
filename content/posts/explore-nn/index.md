@@ -311,7 +311,7 @@ There's one more piece we've glossed over till now: the role of the Sigmoid acti
 
 As you can see, the Sigmoid function  asymptotically approaches 0 as $x \to -\infty$, and it approaches 1 as $x \to \infty$. Also notice that $\sigma(0) = \frac{1}{2}$; so, negative inputs have output values of smaller than $\frac{1}{2}$ (close to 0) and positive inputs have output values of greater than $\frac{1}{2}$ (close to 1). 
 
-Remember that this activation function is acting on the output of our linear classifier, which gives negative values for "0" classifications and positive values for "1" classifications. Sometimes, however, we care about just \textit{how} correct a classification is. A "more negative" output for a "0" classification is better than a negative output that is closer to 0. Applying the Sigmoid function makes this concept of "more" or "less" negativity well-defined. If we apply $\sigma$ to any negative value, an output closer to 0 would signify more decisiveness of the model (more negativity), whereas an output closer to 0.5 would signify less decisiveness (less negativity). We can say the equivalent for positive classifications and $\sigma$'s corresponding proximity to 1. 
+Remember that this activation function is acting on the output of our linear classifier, which gives negative values for "0" classifications and positive values for "1" classifications. Sometimes, however, we care about just _how_ correct a classification is. A "more negative" output for a "0" classification is better than a negative output that is closer to 0. Applying the Sigmoid function makes this concept of "more" or "less" negativity well-defined. If we apply $\sigma$ to any negative value, an output closer to 0 would signify more decisiveness of the model (more negativity), whereas an output closer to 0.5 would signify less decisiveness (less negativity). We can say the equivalent for positive classifications and $\sigma$'s corresponding proximity to 1. 
 $$f\left(\vec{x}\right) = \frac{1}{1 + e^{-W^{(2)}\vec{x}}}$$
 
 This final layer, displayed compactly above, is also called Logistic Regression. In a sense, it provides a kind of "probability" for the correctness of the output. If the model was very sure that a data-point had the classification "1", it would output a value $p \approx 1$ at the end of the network, and this value would also serve as this "probability of correctness". On the other hand, if the model was very sure a data-point was labeled "0", it would output a positive value $p \approx 0$, and the probability of correctness would be $1- p$. It's a handy set up that gives us real-time insight into what the algorithm is thinking on any given data-point.
@@ -486,7 +486,7 @@ Finally, we're down to the last term: $\frac{d\vec{z}_1}{d W^{(1)}}$. Now, we tr
 
 I'm not qualified to answer that question, so I decided to do something a little nifty. Let's bring the problem back into my abilities; what if we found a way to think of the matrix $W^{(1)}$ as a vector? 
 
-We know that $W^{(1)} \vec{x}$ is a vector, whose $i$th row is the dot-product of $\vec{x}$ with row $i$ of $W^{(1)}$. Because I said so, and because I'm the one writing this, let's take each row of $W^{(1)}$, make them columns, and stack them on top of each other. That makes $W^{(1)}$ into a vector $\vec{w}_1$. In order to get the right result for $W^{(1)} \vec{x}$, we make the vector $\vec{x}$ into a \textit{matrix} $X$, and have it act on our new $\vec{w}_1$. Here's what I mean:
+We know that $W^{(1)} \vec{x}$ is a vector, whose $i$th row is the dot-product of $\vec{x}$ with row $i$ of $W^{(1)}$. Because I said so, and because I'm the one writing this, let's take each row of $W^{(1)}$, make them columns, and stack them on top of each other. That makes $W^{(1)}$ into a vector $\vec{w}_1$. In order to get the right result for $W^{(1)} \vec{x}$, we make the vector $\vec{x}$ into a _matrix_ $X$, and have it act on our new $\vec{w}_1$. Here's what I mean:
 
 $$W^{(1)} \vec{x} = 
 \begin{bmatrix} W^{(1)}_{1, 1} &  W^{(1)}_{1, 2} & W^{(1)}_{1, 3} \\ W^{(1)}_{2, 1} &  W^{(1)}_{2, 2} & W^{(1)}_{2, 3} \\
@@ -504,7 +504,7 @@ $$ = \begin{bmatrix}
  \\ W^{(1)}_{3, 1}\\ W^{(1)}_{3, 2} \\ W^{(1)}_{3, 3}
 \end{bmatrix} = X \vec{w}_1 $$
 
-Now, we can re-form our function to say: $\vec{z}_1 = \begin{bmatrix}X \vec{w}_1 \\ 1\end{bmatrix}$. Let's use an intermediary variable $\vec{q} = X \vec{w}_1$, and let's find $\frac{d\vec{z}_1}{d\vec{w}_1}$. \\
+Now, we can re-form our function to say: $\vec{z}_1 = \begin{bmatrix}X \vec{w}_1 \\ 1\end{bmatrix}$. Let's use an intermediary variable $\vec{q} = X \vec{w}_1$, and let's find $\frac{d\vec{z}_1}{d\vec{w}_1}$.
 
 By the Jacobian rule, we know: $$\frac{d \vec{z}_1}{d \vec{q}} = \begin{bmatrix} 1 & 0 & 0 \newline 0 & 1 & 0 \newline 0 & 0 & 1 \newline 0 & 0 & 0\end{bmatrix}$$
 
@@ -517,7 +517,7 @@ $$\frac{d\mathcal{L}}{d \vec{w}_1} = \frac{d\mathcal{L}}{d \tilde{y}} \cdot \fra
 
 $$2 (\tilde{y} - y) \cdot \sigma'(\vec{z}_2) \cdot W^{(2)} \cdot \begin{bmatrix}R'(\vec{z}_{1, 1}) & 0 & 0 & 0 \newline
 0 & R'(\vec{z}_{1, 2}) & 0 & 0 \newline
-0 & 0 & R'(\vec{z}_{1, 3}) & 0 \newlnie
+0 & 0 & R'(\vec{z}_{1, 3}) & 0 \newline
 0 & 0 & 0 & R'(\vec{z}_{1, 4})
 \end{bmatrix}\cdot \begin{bmatrix} 1 & 0 & 0 \newline 0 & 1 & 0 \newline 0 & 0 & 1 \newline 0 & 0 & 0\end{bmatrix} X $$
 $$ = 2 (\tilde{y} - y) \cdot \sigma'(\vec{z}_2) \cdot W^{(2)} \cdot \begin{bmatrix}R'(\vec{z}_{1, 1}) & 0 & 0 \newline

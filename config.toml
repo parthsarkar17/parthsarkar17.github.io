@@ -68,7 +68,7 @@ links = [
     { name = "Email", icon = "email", url = "mailto:<sarkar.parth47@gmail.com>" },
 ]
 
-force_theme = "dark"                   # false | "light" | "dark"
+force_theme = false                   # false | "light" | "dark"
 blog_categorized = true               # Whether to categorize blog posts
 blur_effect = false                   # Whether to turn on blur effect on navigation bar
 back_to_top = true                    # Whether to show back-to-top button on post pages
