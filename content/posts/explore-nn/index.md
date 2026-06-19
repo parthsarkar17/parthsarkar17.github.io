@@ -482,7 +482,9 @@ $$\frac{d\vec{x}_{1}}{d\vec{z}_1} = \begin{bmatrix} R'(\vec{z}_1(1)) & {0} & {0}
 
 where $\vec{z}_{1}(i)$ is the $i$ th element of the vector $\vec{z}_1$.
 
-Finally, we're down to the last term: $\frac{d\vec{z}_1}{d W^{(1)}}$. Now, we truly encounter the problem of $W^{(1)}$ being a 3-by-3 matrix. We know that $\vec{z}_1 = \begin{bmatrix}W^{(1)} \vec{x} \newline 1\end{bmatrix}$, but we've only ever done the derivative of a function with respect to a vector; what does it mean to take a derivative of a function with respect to a matrix? 
+Finally, we're down to the last term: $\frac{d\vec{z}_1}{d W^{(1)}}$. Now, we truly encounter the problem of $W^{(1)}$ being a 3-by-3 matrix. We know that $\vec{z}_1 = \begin{bmatrix}W^{(1)} \vec{x} \newline 1\end{bmatrix}$, but we've only ever done the derivative of a function with respect to a vector; what does it mean to take a derivative of a function with respect to a matrix?
+
+####
 
 I'm not qualified to answer that question, so I decided to do something a little nifty. Let's bring the problem back into my abilities; what if we found a way to think of the matrix $W^{(1)}$ as a vector? 
 
@@ -496,7 +498,7 @@ W^{(1)}_{3, 1} &  W^{(1)}_{3, 2} & W^{(1)}_{3, 3}
 \end{bmatrix}
 \begin{bmatrix}
 \vec{x}_{1,1} \newline \vec{x}_{1,2} \newline \vec{x}_{1,3}
-\end{bmatrix}
+\end{bmatrix}\newline
  = \begin{bmatrix}
 \vec{x}_{1,1} & \vec{x}_{1,2} & \vec{x}_{1,3} & 0 & 0 & 0 & 0 & 0 & 0 \newline
   0 & 0 & 0 & \vec{x}_{1,1} & \vec{x}_{1,2} & \vec{x}_{1,3}& 0 & 0 & 0 \newline
@@ -509,7 +511,7 @@ $$
 </div>
 
 
-BruhNow, we can re-form our function to say: $\vec{z}_1 = \begin{bmatrix}X \vec{w}_1 \newline 1\end{bmatrix}$. Let's use an intermediary variable $\vec{q} = X \vec{w}_1$, and let's find $\frac{d\vec{z}_1}{d\vec{w}_1}$.
+Now, we can re-form our function to say: $\vec{z}_1 = \begin{bmatrix}X \vec{w}_1 \newline 1\end{bmatrix}$. Let's use an intermediary variable $\vec{q} = X \vec{w}_1$, and let's find $\frac{d\vec{z}_1}{d\vec{w}_1}$.
 
 By the Jacobian rule, we know: $$\frac{d \vec{z}_1}{d \vec{q}} = \begin{bmatrix} 1 & 0 & 0 \newline 0 & 1 & 0 \newline 0 & 0 & 1 \newline 0 & 0 & 0\end{bmatrix}$$
 
@@ -518,6 +520,7 @@ $\frac{d \vec{z}_1}{d \vec{w}_1} = \begin{bmatrix} 1 & 0 & 0 \newline 0 & 1 & 0 
 
 And that's it! We computed all five of the derivatives we need to find $\frac{d \mathcal{L}}{d W^{(1)}}$. Putting it all together, we find:
 
+<div>
 $$
 \frac{d\mathcal{L}}{d \vec{w}_1} = \frac{d\mathcal{L}}{d \tilde{y}} \cdot \frac{d\tilde{y}}{d\vec{z}_2} \cdot \frac{d\vec{z}_2}{d \vec{x}_2} \cdot \frac{d\vec{x}_2}{d\vec{z}_1}\cdot \frac{d\vec{z}_1}{d \vec{w}_1} \newline
 = 2 (\tilde{y} - y) \cdot \sigma'(\vec{z}_2) \cdot W^{(2)} \cdot \begin{bmatrix}R'(\vec{z}_{1, 1}) & 0 & 0 & 0 \newline
@@ -525,14 +528,22 @@ $$
 0 & 0 & R'(\vec{z}_{1, 3}) & 0 \newline
 0 & 0 & 0 & R'(\vec{z}_{1, 4})
 \end{bmatrix}\cdot \begin{bmatrix} 1 & 0 & 0 \newline 0 & 1 & 0 \newline 0 & 0 & 1 \newline 0 & 0 & 0\end{bmatrix} X
-$$
-
-$$ = 2 (\tilde{y} - y) \cdot \sigma'(\vec{z}_2) \cdot W^{(2)} \cdot \begin{bmatrix}R'(\vec{z}_{1, 1}) & 0 & 0 \newline
+\newline = 2 (\tilde{y} - y) \cdot \sigma'(\vec{z}_2) \cdot W^{(2)} \cdot \begin{bmatrix}R'(\vec{z}_{1, 1}) & 0 & 0 \newline
 0 & R'(\vec{z}_{1, 2}) & 0  \newline
 0 & 0 & R'(\vec{z}_{1, 3})  \newline
 0 & 0 & 0 
-\end{bmatrix}\cdot X $$
+\end{bmatrix}\cdot X
+$$
+</div>
 
 Computing $\frac{\mathcal{L}}{d W^{(1)}}$ from $\frac{d\mathcal{L}}{d \vec{w}_1}$ is easy. The result we get above is $\frac{d\mathcal{L}}{d \vec{w}_1}$, which is a row vector. To make this back into a matrix, take the first three terms as the first row, the second three terms as the second row, and the final three terms as the final row. Again, update with the rule:
 
 $$W^{(1)} \xleftarrow{} W^{(1)} - \alpha \frac{d\mathcal{L}}{d W^{(1)}}$$
+
+## Conclusion
+
+That's all I have! This project has definitely been pretty math heavy. Take some time to decompress!
+
+Seriously, though, I think it's pretty cool that you can rederive a neural net using math you learn in a first class in multivariable calculus and linear algebra. I think it would be awesome for professors to integrate something like this into their intro math curriculum (but maybe I'm biased!).
+
+To show you that this math works, I also implemented this network and dataset in a [this Julia notebook](https://github.com/parthsarkar17/intsys_onboarding/blob/e429bcb0cbd694f648fcddbb6b15069a29ce65a9/parth_julia_implementation.pdf). The code block at the end pushes each of the four possible inputs through the network, and collects their outputs in a list. The outputs that are supposed to be 0 and 1 are, as expected, respectively close to those values! 
