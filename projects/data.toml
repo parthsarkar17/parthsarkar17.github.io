@@ -1,0 +1,17 @@
+[[project]]
+name = "Extending Softbound with a \"Formally Verified\" Pass"
+desc = "Softbound (Nagarakatte et. al) is an LLVM pass that instruments C programs with runtime checks that guarantee spatial and temporal memory safety. For my ESE 5370 final project (Hardware Security), I added an LLVM pass that carefully elides some of these runtime checks, while still making sure compiled programs retain the property of memory safety. Also, in the spirit of formal verification introduced by the original paper, I faithfully encoded the pass in the Rocq theorem prover; I proved monotonicity on the intraprocedural dataflow setup I used."
+tags = ["LLVM", "Rocq", "Compiler", "Memory Safety"]
+img = ""
+links = [
+  { name = "LLVM transformation code", url = "https://github.com/parthsarkar17/softboundcets-ese5370/blob/38931cde9356d84d142efe8836b39f6233205ba3/llvm-project/llvm/lib/Transforms/SoftBoundCETS/SoftBoundCETS.cpp#L366" },
+  { name = "Report PDF (Sections 1 & 4 are relevant)", url = "https://github.com/parthsarkar17/softboundcets-ese5370/blob/38931cde9356d84d142efe8836b39f6233205ba3/writeup/report.pdf" },
+  { name = "Rocq code", url = "https://github.com/parthsarkar17/softboundcets-ese5370/blob/38931cde9356d84d142efe8836b39f6233205ba3/spa.v" },
+]
+
+# [[project]]
+# name = "" 3
+# desc = ""
+# tags = ["", ""]
+# img = ""
+# links = [{ name = "", url = "" }, { name = "", url = "" }]
